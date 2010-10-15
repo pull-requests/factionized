@@ -5,6 +5,7 @@ from django.conf.urls.defaults import *
 # admin.autodiscover()
 
 urlpatterns = patterns('',
+    (r'^$', 'app.views.game.index'),
     # Example:
     # (r'^factionized/', include('factionized.foo.urls')),
 
