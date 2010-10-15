@@ -16,8 +16,11 @@ def index(request):
 
 def game_view(request, game_id):
     if request.method == 'GET':
+        game = Game.get(game_id)
+        if game is None:
+            raise Http404
         return render_to_response('game/view.html',
-                                  {})
+                                  {'game': game})
     elif request.method == 'PUT':
         raise NotImplementedError()
     elif request.method == 'DELETE':
