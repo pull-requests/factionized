@@ -14,3 +14,13 @@ def index(request):
     else:
         raise Http404
 
+def game_view(request, game_id):
+    if request.method == 'GET':
+        pass
+    elif request.method == 'PUT':
+        raise NotImplementedError()
+    elif request.method == 'DELETE':
+        raise NotImplementedError()
+    else:
+        raise Http404
+
