@@ -1,3 +1,4 @@
+import os
 # Django settings for factionized project.
 
 DEBUG = True
@@ -77,7 +78,9 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'urls'
 
+ROOT_PATH = os.path.dirname(__file__)
 TEMPLATE_DIRS = (
+    ROOT_PATH + "/app/templates",
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
