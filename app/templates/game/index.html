@@ -1,9 +1,13 @@
 <html>
     <head>
-        <title>Hello World!</title>
+        <title>Game Index</title>
     </head>
     <body>
-        <h1>Hello World!</h1>
-        <p>It's aliiiiiiiive!</p>
+        <h1>Games</h1>
+        <ul>
+            {% for game in games %}
+            <li><a href="/games/{{game.id}}">{{game.name}}</a>
+            {% endfor %}
+        </ul>
     </body>
 </html>

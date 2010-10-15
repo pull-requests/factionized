@@ -1,10 +1,10 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
-#from app.models import Game
+from app.models import Game
 
 def index(request):
     if request.method == 'GET':
-        games = []#Game.all()
+        games = Game.all()
         context = dict(games=games)
         return render_to_response('game/index.html',
                                   context)
