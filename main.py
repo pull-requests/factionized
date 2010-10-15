@@ -14,10 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from google.appengine.ext.webapp import util
-import django.core.handlers.wsgi
 import sys
-import os
 
 # Uninstall Django 0.96
 for k in [k for k in sys.modules if k.startswith('django')]:
@@ -27,18 +24,15 @@ for k in [k for k in sys.modules if k.startswith('django')]:
 django_path = 'django.zip'
 sys.path.insert(0, django_path)
 
+import django.core.handlers.wsgi
+from google.appengine.ext.webapp import util
+import os
+
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-
-
-class MainHandler(webapp.RequestHandler):
-    def get(self):
-        self.response.out.write('Hello world!')
-
 
 def main():
     application = django.core.handlers.wsgi.WSGIHandler()
     util.run_wsgi_app(application)
-
 
 if __name__ == '__main__':
     main()
