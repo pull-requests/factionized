@@ -16,7 +16,8 @@ def index(request):
 
 def game_view(request, game_id):
     if request.method == 'GET':
-        pass
+        return render_to_response('game/view.html',
+                                  {})
     elif request.method == 'PUT':
         raise NotImplementedError()
     elif request.method == 'DELETE':
