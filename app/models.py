@@ -16,7 +16,7 @@ class Role(db.Model):
     game = db.ReferenceProperty(Game, required=True)
     profile = db.ReferenceProperty(Profile, 
                                    required=True, 
-                                   collection_set='roles')
+                                   collection_name='roles')
 
 
 class Round(db.Model):
@@ -31,10 +31,10 @@ class Activity(db.Model):
     type_id = db.IntegerProperty(required=True)
     actor = db.ReferenceProperty(Role,
                                  required=True, 
-                                 collection_set='initiated_actions')
+                                 collection_name='initiated_actions')
     target = db.ReferenceProperty(Role, 
                                   required=True, 
-                                  collection_set='received_actions')
+                                  collection_name='received_actions')
     occurred = db.DateTimeProperty(auto_now_add=True, 
                                    required=True)
     message = db.TextProperty()
