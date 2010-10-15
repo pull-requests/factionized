@@ -14,8 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
+import django.core.handlers.wsgi
+import sys
+import os
+
+# Uninstall Django 0.96
+for k in [k for k in sys.modules if k.startswith('django')]:
+    del sys.modules[k]
+
+# Add Django 1.2 archive to the path
+django_path = 'django.zip'
+sys.path.insert(0, django_path)
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 
 class MainHandler(webapp.RequestHandler):
@@ -24,8 +36,7 @@ class MainHandler(webapp.RequestHandler):
 
 
 def main():
-    application = webapp.WSGIApplication([('/', MainHandler)],
-                                         debug=True)
+    application = django.core.handlers.wsgi.WSGIHandler()
     util.run_wsgi_app(application)
 
 
