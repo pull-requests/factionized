@@ -24,6 +24,9 @@ for k in [k for k in sys.modules if k.startswith('django')]:
 django_path = 'django.zip'
 sys.path.insert(0, django_path)
 
+# also add the lib dir
+sys.path.insert(0, 'lib')
+
 import django.core.handlers.wsgi
 from google.appengine.ext.webapp import util
 import os
