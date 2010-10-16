@@ -1,9 +1,31 @@
 body {
 	margin: 0px;
 	padding: 0px;
+	font-size: 13px;
+	font-family: Arial, sans-serif;
 }
 
 #wrapper {
 	width: 80%;
 	margin: 4% auto;
+}
+
+.fz-button {
+	background: #EEE -webkit-gradient(linear, 0 0, 0 100%, from(white), to(#DDD));
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(white), to(#DDD));
+	border-color: #BBB #999 #999 #BBB;
+	border-bottom-left-radius: 2px 2px;
+	border-bottom-right-radius: 2px 2px;
+	border-style: solid;
+	border-width: 1px;
+	border-top-left-radius: 2px 2px;
+	border-top-right-radius: 2px 2px;
+	color: black;
+	cursor: pointer;
+	display: inline-block;
+	font: normal normal normal 13px/13px Arial, sans-serif;
+	margin: 0px;
+	padding: 4px 8px 5px;
+	text-decoration: none;
+	text-shadow: white 0px 1px 1px;
 }

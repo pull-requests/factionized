@@ -1,5 +1,6 @@
-from google.appengine.api import users
-from django.shortcuts import render_to_response
+from app.decorators import login_required
+from app.shortcuts import render
 
+@login_required
 def index(request):
-    return render_to_response('user/index.html')
+    return render('user/index.html')
