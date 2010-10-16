@@ -1,5 +1,21 @@
 from google.appengine.ext import db
 
+class UIDModel(db.Model):
+    def __init__(self, *args, **kw):
+        if not 'key_name' in kw and not '_from_entity' in kw:
+            kw['key_name'] = new_uid()
+
+        super(UIDModel, self).__init__(*args, **kw)
+
+        if not '_from_entity' in kw:
+            self.uid = kw['key_name']
+
+    uid = db.StringProperty()
+
+    @classmethod
+    def get_by_uid(cls, uid):
+        return cls.get_by_key_name(uid)
+
 class Game(db.Model):
 
     name = db.StringProperty(required=True)
