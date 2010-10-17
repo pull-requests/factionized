@@ -1,11 +1,11 @@
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
+from google.appengine.api import users
 from app.decorators import login_required
 from app.shortcuts import render
 from app.models import Game, Round, Thread
 from datetime import datetime, timedelta
 
-@login_required
 def index(request):
     if request.method == 'GET':
         games = Game.all()
@@ -13,23 +13,22 @@ def index(request):
                       dict(games=games))
 
     elif request.method == 'POST':
+        if not hasattr(request, 'user') or not request.user:
+            login_url = users.create_login_url(request.get_full_path())
+            return redirect(login_url)
         values = request.POST
-        game = Game()
-        game.name = values.get('name', 'Unnamed game')
-        game.game_starter = request.profile
-        game.signup_deadline = datetime.now() + timedelta(7)
+        game = Game(name=values.get('name', 'Unnamed game'),
+                    game_starter=request.profile,
+                    signup_deadline=datetime.now() + timedelta(7))
         game.put()
 
         # create round 0
-        r = Round()
-        r.game = game
-        r.number = 0
+        r = Round(game=game,
+                  number=0)
         r.put()
 
         # create pre-game thread
-        t = Thread()
-        t.round = r
-        t.is_public = True
+        t = Thread(round=r, is_public=True)
         t.put()
 
         # redirect to the game

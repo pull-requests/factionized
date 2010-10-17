@@ -3,4 +3,18 @@
 {% block canvas %}
 	<h1>Games</h1>
 	<p>List of current and historical games filtered by user, date, etc.</p>
+    <div class="form_container">
+        <form method="POST" action="/games">
+            <p>Create a new game:</p>
+            {% csrf_token %}
+            <label for="name">Name:</label>
+            <input type="text" name="name" id="name" />
+            <input type="submit" value="Create" />
+        </form>
+    </div>
+    <ul>
+        {% for game in games %}
+        <li><a href="/game/{{game.uid}}">{{game.name}}</a></li>
+        {% endfor %}
+    </ul>
 {% endblock %}

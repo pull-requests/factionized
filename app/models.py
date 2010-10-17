@@ -89,6 +89,18 @@ class Game(UIDModel):
         else:
             raise NoAvailableGameSlotsError, 'player count reached'
 
+    def get_current_round(self):
+        r = self.get_rounds()
+        try:
+            return r[0]
+        except IndexError, e:
+            return None
+
+    def get_rounds(self):
+        r = Round.all().filter('game =', self)
+        return r.order('-number')
+
+
 
 class Role(polymodel.PolyModel):
 
@@ -128,6 +140,11 @@ class Round(UIDModel):
     number = db.IntegerProperty(required=True)
     created = db.DateTimeProperty(auto_now_add=True,
                                   required=True)
+
+    def get_threads(self, profile):
+        public = list(Thread.all().filter('is_public', True))
+        private = list(Thread.all().filter('members', profile))
+        return public + private
 
 class Thread(UIDModel):
     round = db.ReferenceProperty(Round, required=True)
