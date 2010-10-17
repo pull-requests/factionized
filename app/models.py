@@ -97,7 +97,6 @@ class Game(UIDModel):
         return r.order('-number')
 
 
-
 class Role(polymodel.PolyModel):
 
     def __init__(self, *args, **kw):
