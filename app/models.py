@@ -11,7 +11,6 @@ class FactionizeError(Exception):
 
 class NoAvailableGameSlotsError(FactionizeError):
     pass
-    
 
 class UIDModel(db.Model):
     """Base class to give models a nicer, URL friendly ID.
@@ -32,9 +31,8 @@ class UIDModel(db.Model):
         return cls.get_by_key_name(uid)
 
 class Profile(UIDModel):
-    user = db.UserProperty(auto_current_user_add=True, required=True)
-    end_user_login = db.StringProperty(required=True) # bigdoor end_user_login
-    name = db.StringProperty(required=True)
+    user = db.UserProperty(required=True)
+    name = db.StringProperty(required=False)
 
 class Game(UIDModel):
     name = db.StringProperty(required=True)
@@ -46,6 +44,7 @@ class Game(UIDModel):
     modified_date = db.DateTimeProperty(auto_now=True)
     signup_deadline = db.DateTimeProperty(required=True)
     signups = db.ListProperty(db.Key)
+    started = db.DateTimeProperty()
 
     def create_roles(self):
         # find out how many players there are
@@ -125,6 +124,7 @@ class Doctor(Role):
     pass
 
 class Round(UIDModel):
+    game = db.ReferenceProperty(Game, required=True)
     number = db.IntegerProperty(required=True)
     created = db.DateTimeProperty(auto_now_add=True,
                                   required=True)
@@ -157,4 +157,7 @@ class Kill(Activity):
     pass
 
 class Vote(Activity):
+    pass
+
+class RoundEnd(Activity):
     pass

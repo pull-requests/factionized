@@ -18,20 +18,8 @@ urlpatterns += patterns('app.views.profile',
 
 # Games
 urlpatterns += patterns('app.views.game',
-    url('^games$', 'list', name='game_list'),
-    url('^games/(?P<game_id>\w+)$', 'list', name='game_details'),
-)
-
-# Rounds
-urlpatterns += patterns('app.views.round',
-    url('^games/(?P<game_id>\w+)/rounds$', 'list', name='round_list'),
-    url('^games/(?P<game_id>\w+)/rounds/(?P<round_id>\w+)$', 'details', name='round_details'),
-)
-
-# Threads
-urlpatterns += patterns('app.views.thread',
-    url('^games/(?P<game_id>\w+)/rounds/(?P<round_id>\w+)/threads$', 'list', name='thread_list'),
-    url('^games/(?P<game_id>\w+)/rounds/(?P<round_id>\w+)/threads/(?P<thread_id>\w+)$', 'details', name='thread_details'),
+    url('^games$', 'index', name='game_index'),
+    url('^games/(?P<game_id>\w+)$', 'view', name='game_view'),
 )
 
 # Activities
