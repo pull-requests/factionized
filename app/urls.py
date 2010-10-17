@@ -12,8 +12,8 @@ urlpatterns += patterns('app.views.auth',
 )
 
 # User Profile
-urlpatterns += patterns('app.views.user',
-    url('^user$', 'index', name='user_index'),
+urlpatterns += patterns('app.views.profile',
+    url('^profile$', 'index', name='profile_index'),
 )
 
 # Games

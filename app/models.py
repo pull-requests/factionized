@@ -32,7 +32,8 @@ class UIDModel(db.Model):
         return cls.get_by_key_name(uid)
 
 class Profile(UIDModel):
-    user = db.UserProperty(required=True)
+    user = db.UserProperty(auto_current_user_add=True, required=True)
+    end_user_login = db.StringProperty(required=True) # bigdoor end_user_login
     name = db.StringProperty(required=True)
 
 class Game(UIDModel):
