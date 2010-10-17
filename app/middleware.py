@@ -9,7 +9,7 @@ class GoogleUserMiddleware(object):
         if user:
             request.user = user
             try:
-                request.profile = Profile.all().filter('user =', user)[0]
+                request.profile = Profile.all().filter('user =', user).get()
             except IndexError, e:
                 p = Profile(user=user)
                 p.put()
