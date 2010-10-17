@@ -6,6 +6,8 @@ class GoogleUserMiddleware(object):
 
     def process_request(self, request):
         user = users.get_current_user()
+        request.user = None
+        request.profile = None
         if user:
             request.user = user
             try:

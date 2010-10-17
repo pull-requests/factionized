@@ -117,6 +117,15 @@ class Role(polymodel.PolyModel):
     def get_by_uid(cls, uid):
         return cls.get_by_key_name(uid)
 
+    @classmethod
+    def get_by_profile(cls, game, profile):
+        r = cls.all().filter("player", profile)
+        r = r.filter("game", game)
+        try:
+            return r[0]
+        except IndexError, e:
+            return None
+
 class Vanillager(Role):
     pass
 
@@ -146,10 +155,20 @@ class Thread(UIDModel):
     is_public = db.BooleanProperty(default=False)
     members = db.ListProperty(db.Key)
 
-    def user_can_view(self, user):
-        if self.is_public or user in self.members:
+    def profile_can_view(self, profile):
+        if self.is_public or profile in self.members:
             return True
         return False
+
+    def profile_can_create(self, profile):
+        if profile in self.members:
+            return True
+        return False
+
+class VoteSummary(db.Model):
+    thread = db.ReferenceProperty(Thread, required=True)
+    role = db.ReferenceProperty(Role, required=True)
+    total = db.IntegerProperty(default=0)
 
 class Activity(polymodel.PolyModel):
     actor = db.ReferenceProperty(Role,
@@ -158,6 +177,15 @@ class Activity(polymodel.PolyModel):
     created = db.DateTimeProperty(auto_now_add=True,
                                   required=True)
     thread = db.ReferenceProperty(Thread, required=True)
+
+    @classmethod
+    def get_activities(cls, user, thread):
+        if isinstance(thread, basestring):
+            thread = Thread.get_by_uid(thread)
+        acts = cls.all().filter('thread', thread)
+        acts = acts.order('created')
+        return acts
+
 
 class Message(Activity):
     content = db.TextProperty(required=True)
@@ -171,6 +199,31 @@ class Vote(Activity):
     target = db.ReferenceProperty(Role,
                                   required=True,
                                   collection_name='received_votes')
+
+    def increment(self):
+        s = VoteSummary.all().filter("role", self.target)
+        s = s.filter("thread", self.thread)
+        try:
+            s = s.order("-created")[0]
+        except IndexError, e:
+            s = VoteSummary(role=self.target,
+                            thread=self.thread,
+                            total=0)
+        s.total += 1
+        s.put()
+
+    def decrement(self):
+        s = VoteSummary.all().filter("role", self.target)
+        s = s.filter("thread", self.thread)
+        try:
+            s = s.order("-created")[0]
+        except IndexError, e:
+            s = VoteSummary(role=self.target,
+                            thread=self.thread,
+                            total=0)
+        s.total -= 1
+        s.put()
+
 
 class RoundEnd(Activity):
     pass
