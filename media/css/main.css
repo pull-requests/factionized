@@ -3,11 +3,68 @@ body {
 	padding: 0px;
 	font-size: 13px;
 	font-family: Arial, sans-serif;
+	background-color: #E6E3D5;
+}
+
+a { color: #241CB0; }
+
+a:visited {
+	color: auto;
 }
 
 #wrapper {
-	width: 80%;
-	margin: 4% auto;
+	width: 90%;
+	margin: 2% auto;
+}
+
+.fz-canvas {
+	border: solid 1px #CFCBB4;
+	background-color: #FAF9F5;
+	padding: 20px 4%;
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+	min-height: 300px;
+}
+
+#fz-nav, #fz-user-nav {
+	padding: 8px 7px 6px;
+	font-size: 14px;
+	background-color: #FAF9F5;
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+}
+
+#fz-nav {
+	display: block;
+	float: left;
+	margin: 1px 0px 0px 1px;
+}
+
+#fz-user-nav {
+	-webkit-box-shadow: #bbb 0px 2px 3px;
+	-moz-box-shadow: #bbb 0px 2px 3px;
+	text-align: right;
+	padding: 9px 8px 7px;
+	border: solid 1px #CFCBB4;
+}
+
+#fz-nav a:hover, #fz-user-nav a:hover {
+	text-decoration: underline;
+}
+
+#fz-nav span,
+#fz-nav a,
+#fz-user-nav span,
+#fz-user-nav a {
+	padding: 0px 4px;
+	margin: 0px 2px;
+	text-decoration: none;
+}
+
+.fz-border {
+	display: block;
+	clear: both;
+	margin-bottom: 10px;
 }
 
 .fz-button {
