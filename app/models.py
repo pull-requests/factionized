@@ -160,9 +160,6 @@ class Activity(polymodel.PolyModel):
     actor = db.ReferenceProperty(Role,
                                  required=True,
                                  collection_name='initiated_actions')
-    target = db.ReferenceProperty(Role,
-                                  required=True,
-                                  collection_name='received_actions')
     created = db.DateTimeProperty(auto_now_add=True,
                                   required=True)
     thread = db.ReferenceProperty(Thread, required=True)
@@ -171,10 +168,14 @@ class Message(Activity):
     content = db.TextProperty(required=True)
 
 class Kill(Activity):
-    pass
+    target = db.ReferenceProperty(Role,
+                                  required=True,
+                                  collection_name='received_kills')
 
 class Vote(Activity):
-    pass
+    target = db.ReferenceProperty(Role,
+                                  required=True,
+                                  collection_name='received_votes')
 
 class RoundEnd(Activity):
     pass
