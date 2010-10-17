@@ -1,0 +1,19 @@
+<div id="fz-nav">
+	<nobr>
+		<!--<a class="fz-home" href="/">Home</a>-->{% if user %}
+		<a class="fz-game" href="/game">Games</a>
+		<a class="fz-leaderboards" href="javascript:void(0)">Leaderboards</a>{% endif %}
+	</nobr>
+</div>
+<div id="fz-user-nav">
+	<nobr>
+		{% if user %}
+		<span class="fz-name">{{ user.nickname }}</span>
+		<a class="fz-profile" href="/user">Profile</a>
+		<a class="fz-logout" href="{{ logout_url }}">Sign out</a>
+		{% else %}
+		<a class="fz-login" href="{{ login_url }}">Sign in</a>
+		{% endif %}
+	</nobr>
+</div>
+<div class="fz-border"></div>

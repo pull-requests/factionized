@@ -1,6 +1,13 @@
 {% extends 'shared/layouts/base.html' %}
-{% block html_body %}
-<div id="wrapper">
-	{% block canvas %}{% endblock %}
-</div>
+{% block body %}
+	<div id="wrapper">
+		{% block toolbar %}
+			{% if user %}
+				{% include 'shared/includes/toolbar.html' %}
+		{% endif %}
+		{% endblock %}
+		<div class="fz-canvas">
+			{% block canvas %}{% endblock %}
+		</div>
+	</div>
 {% endblock %}

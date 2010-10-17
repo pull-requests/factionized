@@ -1,13 +1,17 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-		{% block html_head %}
-			<title>{% block html_title %}Factionized{% endblock %}</title>
-			{% include 'shared/includes/css.html' %}
-			{% include 'shared/includes/js.html' %}
+		{% block head %}
+			<title>{% block head_title %}Factionized{% endblock %}</title>
+			{% block head_css %}
+				{% include 'shared/includes/css.html' %}
+			{% endblock %}
+			{% block head_js %}
+				{% include 'shared/includes/js.html' %}
+			{% endblock %}
 		{% endblock %}
 	</head>
 	<body>
-		{% block html_body %}{% endblock %}
+		{% block body %}{% endblock %}
 	</body>
 </html>
