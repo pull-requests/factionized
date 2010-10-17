@@ -8,6 +8,14 @@ from app.exc import NoAvailableGameSlotsError
 from math import ceil, floor
 from random import random
 
+role_vanillager = 'vanillager'
+role_doctor = 'doctor'
+role_sheriff = 'sheriff'
+role_mafia = 'mafia'
+
+roles = [role_vanillager, role_doctor, role_sheriff, role_mafia]
+public_role_threads = [role_vanillager]
+
 class UIDModel(db.Model):
     """Base class to give models a nicer, URL friendly ID.
     """
@@ -109,6 +117,7 @@ class Role(polymodel.PolyModel):
             self.uid = kw['key_name']
 
     uid = db.StringProperty()
+    name = db.StringProperty(choices=roles, required=True)
     game = db.ReferenceProperty(Game, required=True)
     player = db.ReferenceProperty(Profile, default=None, required=True)
     is_dead = db.BooleanProperty(default=False, required=True)
@@ -126,19 +135,6 @@ class Role(polymodel.PolyModel):
         except IndexError, e:
             return None
 
-class Vanillager(Role):
-    pass
-
-class Mafia(Role):
-    """We'll add any specials here"""
-    pass
-
-class Sherrif(Role):
-    pass
-
-class Doctor(Role):
-    pass
-
 class Round(UIDModel):
     game = db.ReferenceProperty(Game, required=True)
     number = db.IntegerProperty(required=True)
@@ -146,17 +142,20 @@ class Round(UIDModel):
                                   required=True)
 
     def get_threads(self, profile):
-        public = list(Thread.all().filter('is_public', True))
+        public = list(Thread.all().filter('name', 'public'))
         private = list(Thread.all().filter('members', profile))
         return public + private
 
 class Thread(UIDModel):
     round = db.ReferenceProperty(Round, required=True)
-    is_public = db.BooleanProperty(default=False)
+    name = db.StringProperty(choices=roles)
     members = db.ListProperty(db.Key)
 
+    def is_public(self):
+        return self.name in public_role_threads
+
     def profile_can_view(self, profile):
-        if self.is_public or profile in self.members:
+        if self.is_public() or profile in self.members:
             return True
         return False
 
