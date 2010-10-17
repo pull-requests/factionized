@@ -164,6 +164,15 @@ class Activity(polymodel.PolyModel):
                                   required=True)
     thread = db.ReferenceProperty(Thread, required=True)
 
+    @classmethod
+    def get_activities(cls, user, thread):
+        if isinstance(thread, basestring):
+            thread = Thread.get_by_uid(thread)
+        acts = cls.all().filter('thread', thread)
+        acts = acts.order('created')
+        return acts
+
+
 class Message(Activity):
     content = db.TextProperty(required=True)
 
