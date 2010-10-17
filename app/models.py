@@ -3,6 +3,15 @@ from google.appengine.ext.db import polymodel
 from app.lib.uid import new_uid
 
 from math import ceil, floor
+from random import random
+
+class FactionizeError(Exception):
+    # base exception for the factionize code
+    pass
+
+class NoAvailableGameSlotsError(FactionizeError):
+    pass
+    
 
 class UIDModel(db.Model):
     """Base class to give models a nicer, URL friendly ID.
@@ -70,6 +79,17 @@ class Game(UIDModel):
             r.put()
         self.put()
 
+    def add_random_profile(self, profile):
+        avail_roles = self.role_set.filter('player =', None).fetch()
+        if avail_roles:
+            r = random.shuffle(avail_roles)[0]
+            r.player = profile
+            r.put()
+            return r
+        else:
+            raise NoAvailableGameSlotsError, 'player count reached'
+
+
 class Role(polymodel.PolyModel):
 
     def __init__(self, *args, **kw):
@@ -83,9 +103,8 @@ class Role(polymodel.PolyModel):
 
     uid = db.StringProperty()
     game = db.ReferenceProperty(Game, required=True)
-    player = db.ReferenceProperty(Profile)
-    is_dead = db.BooleanField(default=False,
-                              required=True)
+    player = db.ReferenceProperty(Profile, default=None, required=True)
+    is_dead = db.BooleanField(default=False, required=True)
 
     @classmethod
     def get_by_uid(cls, uid):

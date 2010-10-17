@@ -10,3 +10,8 @@ urlpatterns = patterns('app.views.auth',
 urlpatterns += patterns('app.views.user',
     url('^$', 'index', name='user_index'),
 )
+
+# Round End Task
+urlpattens += pattens('app.views.task',
+    url('^/tasks/round_end/games/(?P<game>\d+)/rounds/(?P<round>\d+)/$'),
+)
