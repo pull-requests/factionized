@@ -4,9 +4,14 @@ from django.shortcuts import redirect
 
 def login(request):
     user = users.get_current_user()
-    next = request.GET.get('next', reverse('user_index'))
+
     if user:
+        profile = request.profile
+        next = request.GET.get('next', 
+                               reverse('profile_show', 
+                                       kwargs=dict(profile_id=profile.uid)))
         return redirect(next)
+
     return redirect(users.create_login_url(next))
 
 def logout(request):
