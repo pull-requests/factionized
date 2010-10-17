@@ -14,7 +14,12 @@ role_sheriff = 'sheriff'
 role_mafia = 'mafia'
 
 roles = [role_vanillager, role_doctor, role_sheriff, role_mafia]
-public_role_threads = [role_vanillager]
+
+thread_pregame = 'pregame'
+thread_ghosts = 'ghosts'
+threads = [role_vanillager, role_doctor, role_sheriff, role_mafia,
+           thread_pregame, thread_ghosts]
+public_threads = [thread_pregame, role_vanillager]
 
 class UIDModel(db.Model):
     """Base class to give models a nicer, URL friendly ID.
@@ -65,19 +70,22 @@ class Game(UIDModel):
 
         # create the roles
         for i in range(mafia_count):
-            r = Mafia()
+            r = Role()
+            r.name = role_mafia
             r.player = self.signups.pop(0)
             r.game = self
             r.put()
 
         if self.has_doctor:
-            r = Doctor()
+            r = Role()
+            r.name = role_doctor
             r.player = self.signups.pop(0)
             r.game = self
             r.put()
 
         if self.has_sherrif:
-            r = Sherrif()
+            r = Role()
+            r.name = role_sheriff
             r.player = self.signups.pop(0)
             r.game = self
             r.put()
@@ -152,7 +160,7 @@ class Thread(UIDModel):
     members = db.ListProperty(db.Key)
 
     def is_public(self):
-        return self.name in public_role_threads
+        return self.name in public_threads
 
     def profile_can_view(self, profile):
         if self.is_public() or profile in self.members:

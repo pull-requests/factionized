@@ -3,7 +3,7 @@ from django.shortcuts import redirect
 from google.appengine.api import users
 from app.decorators import login_required
 from app.shortcuts import render
-from app.models import Game, Round, Thread
+from app.models import Game, Round, Thread, thread_pregame 
 from datetime import datetime, timedelta
 
 def index(request):
@@ -28,7 +28,7 @@ def index(request):
         r.put()
 
         # create pre-game thread
-        t = Thread(round=r, is_public=True)
+        t = Thread(round=r, name=thread_pregame)
         t.put()
 
         # redirect to the game
