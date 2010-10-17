@@ -89,6 +89,18 @@ class Game(UIDModel):
         else:
             raise NoAvailableGameSlotsError, 'player count reached'
 
+    def get_current_round(self):
+        r = self.get_rounds()
+        try:
+            return r[0]
+        except IndexError, e:
+            return None
+
+    def get_rounds(self):
+        r = Round.all().filter('game =', self)
+        return r.order('-number')
+
+
 
 class Role(polymodel.PolyModel):
 
@@ -129,6 +141,11 @@ class Round(UIDModel):
     created = db.DateTimeProperty(auto_now_add=True,
                                   required=True)
 
+    def get_threads(self, profile):
+        public = list(Thread.all().filter('is_public', True))
+        private = list(Thread.all().filter('members', profile))
+        return public + private
+
 class Thread(UIDModel):
     round = db.ReferenceProperty(Round, required=True)
     is_public = db.BooleanProperty(default=False)
@@ -143,9 +160,6 @@ class Activity(polymodel.PolyModel):
     actor = db.ReferenceProperty(Role,
                                  required=True,
                                  collection_name='initiated_actions')
-    target = db.ReferenceProperty(Role,
-                                  required=True,
-                                  collection_name='received_actions')
     created = db.DateTimeProperty(auto_now_add=True,
                                   required=True)
     thread = db.ReferenceProperty(Thread, required=True)
@@ -154,10 +168,14 @@ class Message(Activity):
     content = db.TextProperty(required=True)
 
 class Kill(Activity):
-    pass
+    target = db.ReferenceProperty(Role,
+                                  required=True,
+                                  collection_name='received_kills')
 
 class Vote(Activity):
-    pass
+    target = db.ReferenceProperty(Role,
+                                  required=True,
+                                  collection_name='received_votes')
 
 class RoundEnd(Activity):
     pass
