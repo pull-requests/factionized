@@ -23,6 +23,8 @@ urlpatterns += patterns('app.views.game',
 )
 
 # Round End Task
-urlpattens += pattens('app.views.task',
-    url('^/tasks/round_end/games/(?P<game>\d+)/rounds/(?P<round>\d+)/$'),
+urlpatterns += patterns('app.views.task',
+    url('^/tasks/round_end/games/(?P<game>\w+)/rounds/(?P<round>\w+)/$',
+        'end',
+       name='end_round'),
 )
