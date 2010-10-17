@@ -18,8 +18,8 @@ urlpatterns += patterns('app.views.user',
 
 # Games
 urlpatterns += patterns('app.views.game',
-    url('^games$', 'list', name='game_list'),
-    url('^games/(?P<game_id>\w+)$', 'list', name='game_details'),
+    url('^games$', 'index', name='game_index'),
+    url('^games/(?P<game_id>\w+)$', 'view', name='game_view'),
 )
 
 # Rounds
