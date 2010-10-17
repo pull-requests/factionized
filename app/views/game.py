@@ -1,20 +1,16 @@
+from django.http import Http404
+from django.shortcuts import redirect
 from app.decorators import login_required
-from app.shortcuts import render, redirect, render_to_response
+from app.shortcuts import render
 from app.models import Game, Round, Thread
 from datetime import datetime, timedelta
 
 @login_required
-def details(request):
-    return render('game/details.html')
-
-@login_required
 def index(request):
     if request.method == 'GET':
-        context = {}
         games = Game.all()
-        context['games'] = games
-        return render_to_response('game/list.html',
-                                  context)
+        return render('game/list.html',
+                      dict(games=games))
 
     elif request.method == 'POST':
         values = request.POST
@@ -38,3 +34,26 @@ def index(request):
 
         # redirect to the game
         return redirect('/games/%s' % game.uid)
+
+def view(request, game_id):
+    game = Game.get_by_uid(game_id)
+    if game is None:
+        raise Http404
+
+    current_round = game.get_current_round()
+    rounds = game.get_rounds()
+    threads = current_round.get_threads(request.profile)
+    return render('game/view.html',
+                  dict(current_round=current_round,
+                       rounds=rounds,
+                       threads=threads)
+
+@login_required
+def join(request, game_id):
+    game = Game.get_by_uid(game_id)
+    if game is None:
+        raise Http404
+
+    game.signups.append(request.profile)
+    game.put()
+    return redirect('/game/%s' % game.uid)
