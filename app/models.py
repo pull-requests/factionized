@@ -32,7 +32,7 @@ class UIDModel(db.Model):
 
 class Profile(UIDModel):
     user = db.UserProperty(required=True)
-    name = db.StringProperty(required=True)
+    name = db.StringProperty(required=False)
 
 class Game(UIDModel):
     name = db.StringProperty(required=True)

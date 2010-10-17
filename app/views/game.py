@@ -46,7 +46,7 @@ def view(request, game_id):
     return render('game/view.html',
                   dict(current_round=current_round,
                        rounds=rounds,
-                       threads=threads)
+                       threads=threads))
 
 @login_required
 def join(request, game_id):
