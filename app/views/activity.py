@@ -4,7 +4,7 @@ from app.models import Game, Round, Thread, Activity, Message, Vote
 from app.shortcuts import json
 
 def get_activities(cls, user, thread_id):
-    thread = Thread.get_by_id(thread_id))
+    thread = Thread.get_by_id(thread_id)
     if not thread:
         return HttpResponse('Not Found', status=404)
     if not thread.user_can_view(user):

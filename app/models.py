@@ -1,16 +1,12 @@
 from google.appengine.ext import db
 from google.appengine.ext.db import polymodel
+
 from app.lib.uid import new_uid
+
+from app.exc import NoAvailableGameSlotsError
 
 from math import ceil, floor
 from random import random
-
-class FactionizeError(Exception):
-    # base exception for the factionize code
-    pass
-
-class NoAvailableGameSlotsError(FactionizeError):
-    pass
 
 class UIDModel(db.Model):
     """Base class to give models a nicer, URL friendly ID.
