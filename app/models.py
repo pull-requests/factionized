@@ -104,7 +104,7 @@ class Role(polymodel.PolyModel):
     uid = db.StringProperty()
     game = db.ReferenceProperty(Game, required=True)
     player = db.ReferenceProperty(Profile, default=None, required=True)
-    is_dead = db.BooleanField(default=False, required=True)
+    is_dead = db.BooleanProperty(default=False, required=True)
 
     @classmethod
     def get_by_uid(cls, uid):
@@ -131,8 +131,8 @@ class Round(UIDModel):
 
 class Thread(UIDModel):
     round = db.ReferenceProperty(Round, required=True)
-    is_public = db.BooleanField(default=False)
-    members = db.ListField(db.Key, default=[])
+    is_public = db.BooleanProperty(default=False)
+    members = db.ListProperty(db.Key)
 
     def user_can_view(self, user):
         if self.is_public or user in self.members:
