@@ -11,7 +11,6 @@ class FactionizeError(Exception):
 
 class NoAvailableGameSlotsError(FactionizeError):
     pass
-    
 
 class UIDModel(db.Model):
     """Base class to give models a nicer, URL friendly ID.
@@ -45,6 +44,7 @@ class Game(UIDModel):
     modified_date = db.DateTimeProperty(auto_now=True)
     signup_deadline = db.DateTimeProperty(required=True)
     signups = db.ListProperty(db.Key)
+    started = db.DateTimeProperty()
 
     def create_roles(self):
         # find out how many players there are
@@ -124,14 +124,15 @@ class Doctor(Role):
     pass
 
 class Round(UIDModel):
+    game = db.ReferenceProperty(Game, required=True)
     number = db.IntegerProperty(required=True)
-    created = db.DateTimeProperty(auto_now_add=rue,
+    created = db.DateTimeProperty(auto_now_add=True,
                                   required=True)
 
 class Thread(UIDModel):
     round = db.ReferenceProperty(Round, required=True)
     is_public = db.BooleanField(default=False)
-    members = db.ListField(db.Key)
+    members = db.ListField(db.Key, default=[])
 
     def user_can_view(self, user):
         if self.is_public or user in self.members:
@@ -156,4 +157,7 @@ class Kill(Activity):
     pass
 
 class Vote(Activity):
+    pass
+
+class RoundEnd(Activity):
     pass
