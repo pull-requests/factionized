@@ -10,6 +10,6 @@
 		</p>
 	</div>
 	<div class="fz-login">
-		<a href="/user" class="fz-button">My Profile</a>
+		<a href="{% url app.views.profile.show profile_id=profile.uid %}" class="fz-button">My Profile</a>
 	</div>
 {% endblock %}
