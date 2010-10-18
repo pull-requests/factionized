@@ -12,8 +12,13 @@ role_vanillager = 'vanillager'
 role_doctor = 'doctor'
 role_sheriff = 'sheriff'
 role_mafia = 'mafia'
+role_bystander = 'bystander'
 
-roles = [role_vanillager, role_doctor, role_sheriff, role_mafia]
+roles = [role_vanillager,
+         role_doctor,
+         role_sheriff,
+         role_mafia,
+         role_bystander]
 
 thread_pregame = 'pregame'
 thread_ghosts = 'ghosts'
@@ -109,18 +114,7 @@ class Game(UIDModel):
         return r.order('-number')
 
 
-class Role(polymodel.PolyModel):
-
-    def __init__(self, *args, **kw):
-        if not 'key_name' in kw and not '_from_entity' in kw:
-            kw['key_name'] = new_uid()
-
-        super(Role, self).__init__(*args, **kw)
-
-        if not '_from_entity' in kw:
-            self.uid = kw['key_name']
-
-    uid = db.StringProperty()
+class Role(UIDModel):
     name = db.StringProperty(choices=roles, required=True)
     game = db.ReferenceProperty(Game, required=True)
     player = db.ReferenceProperty(Profile, default=None, required=True)
