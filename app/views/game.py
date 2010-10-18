@@ -5,6 +5,7 @@ from google.appengine.api import users
 from google.appengine.api.labs import taskqueue
 from app.decorators import login_required
 from app.shortcuts import render, json_encode
+from app.exc import FactionizeError
 from app.models import (Game, Round, Thread, thread_pregame, Role,
                         role_bystander)
 from datetime import datetime, timedelta
@@ -71,13 +72,13 @@ def start(request, game_id):
     if (game.started and game.started < now) or game.signup_deadline < now:
         return HttpResponse(status=401)
 
-    game.start_game()
+    try:
+        game.start_game()
+    except FactionizeError, e:
+        return HttpResponse('Cannot start game', status=401)
 
     latest_round = game.get_current_round()
     taskqueue.add(url=reverse('end_round', 
                               kwargs={'game_id':game.uid,
                                       'round_id':latest_round.uid}),
                   countdown=latest_round.length())
-
-
-    
