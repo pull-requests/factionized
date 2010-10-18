@@ -55,3 +55,30 @@ a:visited {
 	text-decoration: none;
 	text-shadow: white 0px 1px 1px;
 }
+
+.fz-thread form textarea,
+.fz-thread form .bd-button,
+.fz-thread form, .fz-thread .fz-log {
+	display: block;
+}
+
+.fz-thread .fz-log {
+	height: 300px;
+}
+
+.fz-thread form .bd-button,
+.fz-thread .fz-log,
+.fz-textarea.fz-wrapper {
+	border: 1px solid #000;
+}
+
+
+.fz-thread form textarea {
+	width: 100%;
+	border: 0px;
+}
+
+.fz-textarea.fz-wrapper {
+	margin:5px 0;
+	padding: 0px 7px 0px 1px;
+}
