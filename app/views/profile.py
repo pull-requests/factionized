@@ -9,7 +9,7 @@ from app.decorators import login_required
 from app.models import Profile
 from app.shortcuts import render
 
-from lib import facebook
+from app.lib import facebook
 
 #from bigdoorkit.resources.user import EndUser
 
