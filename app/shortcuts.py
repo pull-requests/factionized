@@ -1,4 +1,7 @@
-import json as json_mod
+try:
+    import json as json_mod
+except:
+    import simplejson as json_mod
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
