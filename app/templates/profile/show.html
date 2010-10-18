@@ -8,6 +8,31 @@
 	<div id="awards_pane" class="grid_12 pane">
 		<h1>Awards</h1>
 		<span>Awards go here</span>
+		{% for level in bd_end_user.levels %}
+		<div id="fz-level">
+			<img id="fz-level-image" src={{ level.url }} height="200px" width="200px" /><br />
+			<label for="fz-level-image">{{ level.end_user_title }}</label><br />
+			<span id="fz-level-description">{{ level.end_user_description }}</span>
+			{% ifequal profile.fb_auth 1 %}
+			<form method="post" action="http://www.factionized.com/profile/facebook/feed">
+				<fieldset>
+					{% csrf_token %}
+					<input type="hidden"
+						   name="message"
+						   value="{{ level.end_user_title }}" />
+					<input type="hidden"
+						   name="image_url"
+						   value="{{ level.url }}" />
+					<input type="hidden"
+						   name="caption"
+						   value="{{ level.end_user_description }}" />
+					<button type="button" class="fz-facebook-post fz-button">Post it!</button>
+				</fieldset>
+			</form>
+			{% endifequal %}
+		</div>
+		{% endfor %}
+
 	</div>
 	{% if is_editable %}
 	<div id="edit_pane" class="grid_12 pane">

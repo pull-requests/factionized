@@ -17,5 +17,4 @@ def google_user(request):
     # Add the Facebook API key to the context for easy retrieval
     context['fb_app_id'] = settings.FACEBOOK_APP_ID
     context['fb_key'] = settings.FACEBOOK_API_KEY
-    context['fb_secret'] = settings.FACEBOOK_SECRET_KEY
     return context
