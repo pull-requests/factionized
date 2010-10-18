@@ -5,6 +5,7 @@ from app.lib.uid import new_uid
 
 from app.exc import FactionizeError, NoAvailableGameSlotsError
 
+from datetime import datetime
 from math import ceil, floor
 from random import random
 
@@ -114,15 +115,30 @@ class Game(UIDModel):
                      game=self)
             r.put()
 
-    def add_random_profile(self, profile):
-        avail_roles = self.role_set.filter('player =', None)
-        if avail_roles:
-            r = random.shuffle(avail_roles)[0]
-            r.player = profile
-            r.put()
-            return r
-        else:
-            raise NoAvailableGameSlotsError, 'player count reached'
+    def add_to_waitlist(self, profile):
+
+        pregame_round = self.get_rounds()
+        if not pregame_round.count() or pregame_round[0].number != 0:
+            raise FactionizeError, 'game is not in state to add bystander'
+        pregame_round = pregame_round[0]
+
+        if profile.key() in self.signups:
+            raise FactionizeError, 'profile is already in the waitlist'
+
+        role = Role(name=role_bystander,
+                    player=profile,
+                    game=self)
+        role.put()
+
+        thread = pregame_round.thread_set.filter('name', thread_pregame).get()
+        thread.members.append(profile.key())
+        thread.put()
+        self.signups.append(profile.key())
+        self.put()
+
+        join_activity = PlayerJoin(actor=role,
+                                  thread=thread)
+        join_activity.put()
 
     def get_current_round(self):
         r = self.get_rounds()
@@ -132,33 +148,66 @@ class Game(UIDModel):
             return None
 
     def get_rounds(self):
-        r = Round.all().filter('game =', self)
-        return r.order('-number')
-
+        return self.round_set.order('-number')
     
     def create_game_threads(self, round):
         # create threads for each of the game threads and 
         # add members to them
-        return [Thread(round=round,
+        threads = [Thread(round=round,
                        name=k,
                        members=v(round.game)) for k,v in \
                 thread_profile_selectors.iteritems()]
 
+        for t in threads:
+            t.put()
 
-    def start_next_game_round(self):
+        return threads
+
+    def start_next_round(self):
         last_round = self.get_rounds()
-        if last_round:
+        if last_round.count():
             last_round = last_round[0]
             r = Round(game=self, number=last_round.number+1)
-            threads = self.create_game_threads(r)
-            for t in threads:
-                t.put()
+            self.create_game_threads(r)
             r.put()
             return r
         else:
-            raise FactionizeError, 'start_next_round called on a game has no rounds'
+            raise FactionizeError, 'start_next_round called on a game that has no rounds'
 
+    def start_pregame(self):
+        last_round = self.get_rounds()
+        if last_round.count():
+            raise FactionizeError, 'start_pregame called on a game that is already in or past pregame'
 
+        pregame_round = Round(game=self,
+                              number=0)
+        pregame_round.put()
+        pregame_thread = Thread(name=thread_pregame,
+                                round=pregame_round,
+                                members=[])
+        pregame_thread.put()
+
+    def start_game(self):
+        if len(self.signups) < self.min_players:
+            raise FactionizeError, 'not enough players to start game'
+
+        last_round = self.get_rounds()
+        if last_round.count():
+            if last_round[0].number != 0:
+                raise FactionizeError, 'start_game called on a game that is in progress'
+            self.start_next_round()
+        else:
+            raise FactionizeError, 'start_game called on a game that has no round zero (pregame)'
+
+        self.create_roles()
+        round = self.start_next_round()
+        
+        gs = GameStart(thread=round.get_thread(role_vanillager))
+        gs.put()
+
+        self.started = datetime.now()
+        self.put()
+        
 class Role(UIDModel):
     name = db.StringProperty(choices=roles, required=True)
     game = db.ReferenceProperty(Game, required=True)
@@ -180,6 +229,8 @@ class Role(UIDModel):
 
     def kill(self):
         self.is_dead = True
+        self.put()
+
 
 class Round(UIDModel):
     game = db.ReferenceProperty(Game, required=True)
@@ -192,6 +243,10 @@ class Round(UIDModel):
 
     def get_thead(self, name):
         return self.thread_set.filter('name', name).get()
+
+    def length(self):
+        return 60*60*5 # five minutes
+
 
 class Thread(UIDModel):
     round = db.ReferenceProperty(Round, required=True)
@@ -211,15 +266,14 @@ class Thread(UIDModel):
             return True
         return False
 
+
 class VoteSummary(db.Model):
     thread = db.ReferenceProperty(Thread, required=True)
     role = db.ReferenceProperty(Role, required=True)
     total = db.IntegerProperty(default=0)
 
-class Activity(polymodel.PolyModel):
-    actor = db.ReferenceProperty(Role,
-                                 required=True,
-                                 collection_name='initiated_actions')
+
+class BaseActivity(polymodel.PolyModel):
     created = db.DateTimeProperty(auto_now_add=True,
                                   required=True)
     thread = db.ReferenceProperty(Thread, required=True)
@@ -239,25 +293,41 @@ class Activity(polymodel.PolyModel):
                 return []
         return acts.order('created')
 
+class SystemActivity(BaseActivity):
+    pass
 
+class GameStart(SystemActivity):
+    pass
+
+class RoundEnd(SystemActivity):
+    pass
+
+class Activity(BaseActivity):
+    actor = db.ReferenceProperty(Role,
+                                 required=True,
+                                 collection_name='initiated_actions')
 
 class Message(Activity):
     content = db.TextProperty(required=True)
+
 
 class DeathByVote(Activity):
     vote_thread = db.ReferenceProperty(Thread,
                                        required=True,
                                        collection_name='vote_deaths')
 
+
 class Save(Activity):
     target = db.ReferenceProperty(Role,
                                   required=True,
                                   collection_name='received_saves')
 
+
 class Reveal(Activity):
     target = db.ReferenceProperty(Role, 
                                   required=True,
                                   collection_name='received_reveals')
+
 
 class Vote(Activity):
     target = db.ReferenceProperty(Role,
@@ -289,5 +359,6 @@ class Vote(Activity):
         s.put()
 
 
-class RoundEnd(Activity):
+class PlayerJoin(Activity):
     pass
+

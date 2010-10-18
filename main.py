@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 import sys
+import logging
 
 # Uninstall Django 0.96
 for k in [k for k in sys.modules if k.startswith('django')]:
@@ -34,6 +35,8 @@ import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 def main():
+    logging.getLogger().setLevel(logging.DEBUG) 
+
     application = django.core.handlers.wsgi.WSGIHandler()
     util.run_wsgi_app(application)
 
