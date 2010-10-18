@@ -1,19 +1,17 @@
-<div id="fz-nav">
-	<nobr>
-		<!--<a class="fz-home" href="/">Home</a>-->{% if user %}
-		<a class="fz-game" href="/game">Games</a>
-		<a class="fz-leaderboards" href="javascript:void(0)">Leaderboards</a>{% endif %}
-	</nobr>
+<div id="header" class="container_12">
+    <div class="grid_1 masthead"><a href="/">Factionize</a></div>
+    <div class="grid_1"><a href="/games">Games</a></div>
+    {% if user %}
+    <div class="grid_1 prefix_7 authlink">
+        <a href="/user">{{user.nickname}}</a>
+    </div>
+    <div class="grid_1 prefix_1 authlink">
+        <a href="{{ logout_url }}">Sign out</a>
+    </div>
+    {% else %}
+    <div class="grid_1 prefix_9 authlink">
+        <a href="{{ login_url }}">Sign in</a>
+    </div>
+    {% endif %}
+    <div class="clear"></div>
 </div>
-<div id="fz-user-nav">
-	<nobr>
-		{% if user %}
-		<span class="fz-name">{{ user.nickname }}</span>
-		<a class="fz-profile" href="/user">Profile</a>
-		<a class="fz-logout" href="{{ logout_url }}">Sign out</a>
-		{% else %}
-		<a class="fz-login" href="{{ login_url }}">Sign in</a>
-		{% endif %}
-	</nobr>
-</div>
-<div class="fz-border"></div>
