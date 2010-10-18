@@ -16,6 +16,10 @@ def render(*args, **kw):
 
 class ModelEncoder(json_mod.JSONEncoder):
     def default(self, obj):
+        if isinstance(obj, db.Query):
+            obj = obj.get() or []
+        if isinstance(obj, list) and len(obj) < 1:
+            return obj
         if callable(getattr(obj, '__json__', None)):
             return obj.__json__()
         elif issubclass(obj.__class__, db.Model):
@@ -29,5 +33,5 @@ class ModelEncoder(json_mod.JSONEncoder):
             return super(ModelEncoder, self).default(obj)
 
 def json(data):
-    json_data = json_mod(data, cls=ModelEncoder)
+    json_data = json_mod.dumps(data, cls=ModelEncoder)
     return HttpResponse(json_data, 'application/json')
