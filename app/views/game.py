@@ -5,6 +5,7 @@ from google.appengine.api import users
 from google.appengine.api.labs import taskqueue
 from app.decorators import login_required
 from app.shortcuts import render, json_encode
+from app.exc import FactionizeError
 from app.models import (Game, Round, Thread, thread_pregame, Role,
                         role_bystander)
 from datetime import datetime, timedelta
@@ -40,7 +41,8 @@ def view(request, game_id):
     current_round = game.get_current_round()
     rounds = game.get_rounds()
     threads = current_round.get_threads(request.profile)
-    context = dict(game=game,
+    context = dict(profile=request.profile,
+                   game=game,
                    current_round=current_round,
                    rounds=rounds,
                    threads=threads)
@@ -59,7 +61,7 @@ def join(request, game_id):
 
     if request.profile.key() not in game.signups:
         game.add_to_waitlist(request.profile)
-    return redirect('/game/%s' % game.uid)
+    return redirect('/games/%s' % game.uid)
 
 @login_required
 def start(request, game_id):
@@ -71,13 +73,13 @@ def start(request, game_id):
     if (game.started and game.started < now) or game.signup_deadline < now:
         return HttpResponse(status=401)
 
-    game.start_game()
+    try:
+        game.start_game()
+    except FactionizeError, e:
+        return HttpResponse('Cannot start game', status=401)
 
     latest_round = game.get_current_round()
     taskqueue.add(url=reverse('end_round', 
                               kwargs={'game_id':game.uid,
                                       'round_id':latest_round.uid}),
                   countdown=latest_round.length())
-
-
-    
