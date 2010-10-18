@@ -23,8 +23,8 @@ roles = [role_vanillager,
 thread_pregame = 'pregame'
 thread_ghosts = 'ghosts'
 threads = [role_vanillager, role_doctor, role_sheriff, role_mafia,
-           thread_pregame, thread_ghosts]
-public_threads = [thread_pregame, role_vanillager]
+           role_bystander, thread_pregame, thread_ghosts]
+public_threads = [thread_pregame, role_vanillager, role_bystander]
 
 
 def member_selector(game, alive=True, role=None):
