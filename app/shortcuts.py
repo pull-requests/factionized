@@ -2,6 +2,9 @@ try:
     import json as json_mod
 except:
     import simplejson as json_mod
+
+import time
+from datetime import datetime
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -16,6 +19,10 @@ def render(*args, **kw):
 
 class ModelEncoder(json_mod.JSONEncoder):
     def default(self, obj):
+        if isinstance(obj, datetime):
+            return time.mktime(obj.timetuple())
+        if isinstance(obj, db.Key):
+            return
         if isinstance(obj, db.Query):
             obj = obj.get() or []
         if isinstance(obj, list) and len(obj) < 1:
@@ -23,12 +30,14 @@ class ModelEncoder(json_mod.JSONEncoder):
         if callable(getattr(obj, '__json__', None)):
             return obj.__json__()
         elif issubclass(obj.__class__, db.Model):
-            model_data = dict(key=str(obj.key()), kind=obj.kind())
+            model_data = dict()
+            model_data['class'] = obj.__class__.__name__
             for field_name in obj.fields().keys():
-                model_data[field_name] = getattr(obj, field_name)
+                if field_name != '_class':
+                    model_data[field_name] = getattr(obj, field_name)
             return model_data
         elif isinstance(obj, users.User):
-            return dict(email=obj.email)
+            return dict(email=obj.email())
         else:
             return super(ModelEncoder, self).default(obj)
 
