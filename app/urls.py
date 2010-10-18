@@ -15,7 +15,7 @@ urlpatterns += patterns('app.views.auth',
 urlpatterns += patterns('app.views.profile',
     url(r'^profile$', 'index', name='profile_index'),
     url(r'^profile/edit$', 'edit', name='profile_edit'),
-    url(r'^profile/(?P<profile_id>\w+)/edit$', 'edit', name='profile_edit'),
+    url(r'^profile/edit(?P<code>\w+)$', 'edit', name='profile_edit'),
     url(r'^profile/(?P<profile_id>\w+)$', 'show', name='profile_show')
 )
 

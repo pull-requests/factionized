@@ -69,6 +69,9 @@ class UIDModel(db.Model):
 class Profile(UIDModel):
     user = db.UserProperty(required=True)
     name = db.StringProperty(required=False)
+    fb_token = db.StringProperty(required=False)
+    fb_uid = db.StringProperty(required=False)
+    fb_auth = db.BooleanProperty(default=False)
 
 class Game(UIDModel):
     name = db.StringProperty(required=True)

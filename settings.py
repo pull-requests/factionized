@@ -21,6 +21,12 @@ DATABASES = {
     }
 }
 
+# FACEBOOK APP KEYS
+#FACEBOOK_APP_ID = '135047263210982'
+#FACEBOOK_API_KEY = '6977d97b393a2181f5d1cd8fd76f643b'
+#FACEBOOK_SECRET_KEY = 'abca90b7623f2d0c6b83e2809dbe6345'
+
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -104,3 +110,8 @@ INSTALLED_APPS = (
 TEMPLATE_CONTEXT_PROCESSORS = (
     "app.context_processors.google_user",
 )
+
+try:
+    from settings_fzlocal import *
+except ImportError, e:
+    pass

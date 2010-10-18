@@ -13,4 +13,9 @@
 		<h1>Awards</h1>
 		<span>Awards go here</span>
 	</div>
+	{% if is_editable %}
+	<div id="edit_pane">
+		<a href="/profile/edit" class="fz-button">Edit</a>
+	</div>
+	{% endif %}
 {% endblock %}

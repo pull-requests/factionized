@@ -14,6 +14,30 @@
 		<span>Awards go here</span>
 	</div>
 	<div id="facebook_pane">
-		<b>Facebook Auth</b>
+		<h1>Facebook</h1>
+		{% ifequal profile.fb_auth 1 %}
+		<p>Authenticated Facebook activities go here!</p>
+		{% else %}
+		<div id="facebook_auth">
+			<p>Post your achievements to your wall!</p>
+			<fb:login-button perms="publish_stream,offline_access,read_friendlists"></fb:login-button>
+			<div id="fb-root"></div>
+				<script src="http://connect.facebook.net/en_US/all.js"></script>
+				<script>
+					window.fbAsyncInit = function() {
+						FB.init({appId: {{ fb_app_id }}, status: true, cookie: true,
+								 xfbml: true});
+					};
+					(function() {
+						var e = document.createElement('script');
+						e.type = 'text/javascript';
+						e.src = document.location.protocol +
+								'//connect.facebook.net/en_US/all.js';
+						e.async = true;
+						document.getElementById('fb-root').appendChild(e);
+					}());
+				</script>
+		</div>
+		{% endifequal %}
 	</div>
 {% endblock %}
