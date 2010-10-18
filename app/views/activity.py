@@ -1,9 +1,11 @@
+import time
+
 from django.http import Http404, HttpResponse
 from app.models import Activity, Message, Vote, Thread, Role, Game
 from app.shortcuts import json
 
 def activities(request, game_id, round_id, thread_id):
-    thread = Thread.get_by_uid(thread_id)
+    thread = Thead.get_by_uid(thread_id)
     if thread is None:
         raise Http404
 
@@ -18,7 +20,7 @@ def activities(request, game_id, round_id, thread_id):
 
 
 def votes(request, game_id, round_id, thread_id):
-    thread = Thread.get_by_uid(thread_id)
+    thread = Thead.get_by_uid(thread_id)
     if thread is None:
         raise Http404
 
@@ -26,7 +28,8 @@ def votes(request, game_id, round_id, thread_id):
         return HttpResponse('Unauthorized', status=401)
 
     if request.method == 'GET':
-        return json(Vote.get_activities(request.user, thread))
+        since = request.GET.get('since', None)
+        return json(Vote.get_activities(request.user, thread, since=since))
 
     if request.method == 'POST':
         if not thread.profile_can_create(request.profile):
@@ -72,4 +75,46 @@ def messages(request, game_id, round_id, thread_id):
         return HttpResponse('Unauthorized', status=401)
 
     if request.method == 'GET':
-        return json(Message.get_activities(request.user, thread))
+        since = request.GET.get('since', None)
+        return json(Message.get_activities(request.user,
+                                           thread,
+                                           since=since))
+
+    if request.method == 'POST':
+        if thread.profile_can_create(request.profile):
+            return HttpResponse('Unauthorized', status=401)
+
+        content = request.POST.get('content', None)
+        if not content:
+            return HttpResponse('Method Not Allowed - A message is required', status=405)
+
+        # create the new message
+        game = Game.get_by_uid(game_id)
+        actor = Role.get_by_profile(game, request.profile)
+        message = Message(actor=actor,
+                          content=content,
+                          thread=thread)
+        message.put()
+        return json(message)
+
+    return HttpResponse('Method Not Allowed', status=405)
+
+def activity_stream(request, game_id, round_id, thread_id):
+    thread = Thead.get_by_uid(thread_id)
+    if thread is None:
+        raise Http404
+
+    if not thread.profile_can_view(request.profile):
+        return HttpResponse('Unauthorized', status=401)
+
+    if request.method != 'GET':
+        return HttpResponse('Mthod Not Allowed', status=405)
+
+    since = request.GET.get('since', None)
+    while 1:
+        activities = Activity.get_activities(request.user,
+                                             thread,
+                                             since=since)
+        if len(activities) > 0:
+            return json(activities)
+        time.sleep(500)

@@ -67,29 +67,25 @@ class Game(UIDModel):
             mafia_count = int(ceil(mafia_count))
         else:
             mafia_count = int(floor(mafia_count))
+        innocent_count = player_count - mafia_count
 
-        # create the roles
-        for i in range(mafia_count):
-            r = Role()
-            r.name = role_mafia
-            r.player = self.signups.pop(0)
-            r.game = self
-            r.put()
+        create_role(role_mafia, mafia_count)
+        create_role(role_vanillager, innocent_count)
 
         if self.has_doctor:
-            r = Role()
-            r.name = role_doctor
-            r.player = self.signups.pop(0)
-            r.game = self
-            r.put()
+            self.create_role(role_doctor)
 
         if self.has_sherrif:
+            self.create_role(role_sheriff)
+        self.put()
+
+    def create_role(self, name, count=1):
+        for i in range(count):
             r = Role()
-            r.name = role_sheriff
+            r.name = name
             r.player = self.signups.pop(0)
             r.game = self
             r.put()
-        self.put()
 
     def add_random_profile(self, profile):
         avail_roles = self.role_set.filter('player =', None)
@@ -187,13 +183,19 @@ class Activity(polymodel.PolyModel):
     thread = db.ReferenceProperty(Thread, required=True)
 
     @classmethod
-    def get_activities(cls, user, thread):
+    def get_activities(cls, user, thread, since=None):
         if isinstance(thread, basestring):
             thread = Thread.get_by_uid(thread)
-        acts = cls.all().filter('thread', thread)
-        acts = acts.order('created')
-        return acts
 
+        acts = cls.all().filter('thread', thread)
+
+        if since:
+            last = cls.get_by_uid(since)
+            if last and last.thread == thread:
+                acts.filter('created >', last.created)
+            else:
+                return []
+        return acts.order('created')
 
 class Message(Activity):
     content = db.TextProperty(required=True)
