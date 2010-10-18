@@ -86,6 +86,7 @@ class Game(UIDModel):
     signups = db.ListProperty(db.Key)
     started = db.DateTimeProperty()
 
+
     def create_roles(self):
         # find out how many players there are
         player_count = len(self.signups)
@@ -108,12 +109,14 @@ class Game(UIDModel):
 
         self.put()
 
+
     def create_role(self, name, count=1):
         for i in range(count):
             r = Role(name=name,
                      player=self.signups.pop(0),
                      game=self)
             r.put()
+
 
     def add_to_waitlist(self, profile):
 
@@ -136,9 +139,10 @@ class Game(UIDModel):
         self.signups.append(profile.key())
         self.put()
 
-        join_actvity = PlayerJoin(actor=role,
+        join_activity = PlayerJoin(actor=role,
                                   thread=thread)
-        join.put()
+        join_activity.put()
+
 
     def get_current_round(self):
         r = self.get_rounds()
@@ -147,8 +151,10 @@ class Game(UIDModel):
         except IndexError, e:
             return None
 
+
     def get_rounds(self):
         return self.round_set.order('-number')
+
     
     def create_game_threads(self, round):
         # create threads for each of the game threads and 
@@ -162,6 +168,19 @@ class Game(UIDModel):
             t.put()
 
         return threads
+
+
+    def start_next_round(self):
+        last_round = self.get_rounds()
+        if last_round.count():
+            last_round = last_round[0]
+            r = Round(game=self, number=last_round.number+1)
+            self.create_game_threads(r)
+            r.put()
+            return r
+        else:
+            raise FactionizeError, 'start_next_round called on a game that has no rounds'
+
 
     def start_pregame(self):
         last_round = self.get_rounds()
@@ -194,17 +213,6 @@ class Game(UIDModel):
         self.started = datetime.now()
         self.put()
         
-    def start_next_round(self):
-        last_round = self.get_rounds()
-        if last_round.count():
-            last_round = last_round[0]
-            r = Round(game=self, number=last_round.number+1)
-            self.create_game_threads(r)
-            r.put()
-            return r
-        else:
-            raise FactionizeError, 'start_next_round called on a game that has no rounds'
-
 
 class Role(UIDModel):
     name = db.StringProperty(choices=roles, required=True)
@@ -240,6 +248,9 @@ class Round(UIDModel):
 
     def get_thead(self, name):
         return self.thread_set.filter('name', name).get()
+
+    def length(self):
+        return 60*60*5 # five minutes
 
 class Thread(UIDModel):
     round = db.ReferenceProperty(Round, required=True)

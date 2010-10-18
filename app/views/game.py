@@ -1,6 +1,8 @@
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
+from django.core.urlresolvers import reverse
 from google.appengine.api import users
+from google.appengine.api.labs import taskqueue
 from app.decorators import login_required
 from app.shortcuts import render, json_encode
 from app.models import (Game, Round, Thread, thread_pregame, Role,
@@ -52,9 +54,30 @@ def join(request, game_id):
         raise Http404
 
     now = datetime.now()
-    if game.started < now or game.signup_deadline < now:
+    if (game.started and game.started < now) or game.signup_deadline < now:
         return HttpResponse(status=401)
 
     if request.profile.key() not in game.signups:
         game.add_to_waitlist(request.profile)
     return redirect('/game/%s' % game.uid)
+
+@login_required
+def start(request, game_id):
+    game = Game.get_by_uid(game_id)
+    if game.game_starter != request.profile:
+        return HttpResponse(status=403)
+
+    now = datetime.now()
+    if (game.started and game.started < now) or game.signup_deadline < now:
+        return HttpResponse(status=401)
+
+    game.start_game()
+
+    latest_round = game.get_current_round()
+    taskqueue.add(url=reverse('end_round', 
+                              kwargs={'game_id':game.uid,
+                                      'round_id':latest_round.uid}),
+                  countdown=latest_round.length())
+
+
+    

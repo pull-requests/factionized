@@ -117,6 +117,5 @@ def end(request, game_id, round_id):
     taskqueue.add(url=reverse('round_end', kw_args={'game_id':game.uid,
                                                     'round_id':r.uid}),
                   method='POST',
-                  countdown=60*60*5
-                  )
+                  countdown=r.length())
                   
