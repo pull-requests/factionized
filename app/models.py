@@ -92,7 +92,7 @@ class Game(UIDModel):
         self.put()
 
     def add_random_profile(self, profile):
-        avail_roles = self.role_set.filter('player =', None).fetch()
+        avail_roles = self.role_set.filter('player =', None)
         if avail_roles:
             r = random.shuffle(avail_roles)[0]
             r.player = profile
@@ -150,13 +150,14 @@ class Round(UIDModel):
                                   required=True)
 
     def get_threads(self, profile):
-        public = list(Thread.all().filter('name', 'public'))
-        private = list(Thread.all().filter('members', profile))
-        return public + private
+        return list(self.thread_set.filter('members', profile))
+
+    def get_thead(self, name):
+        return self.thread_set.filter('name', name).get()
 
 class Thread(UIDModel):
     round = db.ReferenceProperty(Round, required=True)
-    name = db.StringProperty(choices=roles)
+    name = db.StringProperty(choices=threads)
     members = db.ListProperty(db.Key)
 
     def is_public(self):
