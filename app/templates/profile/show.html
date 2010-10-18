@@ -1,20 +1,16 @@
 {% extends 'shared/layouts/canvas.html' %}
 
 {% block canvas %}
-	<div class="page_header">
-		<h1>{{ user.email }}</h1>
-		<a href="{% url app.views.auth.logout %}">Logout</a>
-	</div>
-	<div id="games_pane">
+	<div id="games_pane" class="grid_12 pane">
 		<h1>Games</h1>
 		<span>Games go here</span>
 	</div>
-	<div id="awards_pane">
+	<div id="awards_pane" class="grid_12 pane">
 		<h1>Awards</h1>
 		<span>Awards go here</span>
 	</div>
 	{% if is_editable %}
-	<div id="edit_pane">
+	<div id="edit_pane" class="grid_12 pane">
 		<a href="/profile/edit" class="fz-button">Edit</a>
 	</div>
 	{% endif %}
