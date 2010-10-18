@@ -21,11 +21,17 @@ def show(request, profile_id):
     profile = Profile.all().filter('uid =', profile_id).get()
     #bd_end_user = EndUser(end_user_login=profile.uid)
 
+    if profile.uid == request.profile.uid:
+        return edit(request)
+
     return render('profile/show.html', {'bd_end_user':None})
 
 @login_required
 def edit(request):
-    raise NotImplementedError, 'have not done it yet, so there'
+    profile = request.profile
+    #bd_end_user = EndUser(end_user_login=profile.uid)
+
+    return render('profile/edit.html', {'bd_end_user':None})
 
 @login_required
 def new(request):

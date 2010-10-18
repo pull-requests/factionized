@@ -2,3 +2,4 @@ lib/*
 
 *.pyc
 *.swp
+settings_fzlocal.py

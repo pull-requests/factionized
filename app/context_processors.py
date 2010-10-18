@@ -10,4 +10,6 @@ def google_user(request):
     }
     if request and hasattr(request, 'user') and request.user:
         context['user'] = request.user
+    if request and hasattr(request, 'profile') and request.profile:
+        context['profile'] = request.profile
     return context
