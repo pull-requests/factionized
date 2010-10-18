@@ -1,7 +1,7 @@
 {% extends 'shared/layouts/canvas.html' %}
 
 {% block canvas %}
-	<div class="fz-banner">
+	<div class="grid_12">
 		<h1>Factionized</h1>
 		<h2>Social gaming meets <br />old school forum gaming.</h2>
 		<p>
@@ -9,7 +9,8 @@
 			to improve your stats.
 		</p>
 	</div>
-	<div class="fz-login">
+	<div class="grid_1 fz-login">
 		<a href="{% url app.views.profile.show profile_id=profile.uid %}" class="fz-button">My Profile</a>
 	</div>
+    <div class="clear"></div>
 {% endblock %}
