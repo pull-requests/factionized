@@ -23,8 +23,8 @@ roles = [role_vanillager,
 thread_pregame = 'pregame'
 thread_ghosts = 'ghosts'
 threads = [role_vanillager, role_doctor, role_sheriff, role_mafia,
-           thread_pregame, thread_ghosts]
-public_threads = [thread_pregame, role_vanillager]
+           role_bystander, thread_pregame, thread_ghosts]
+public_threads = [thread_pregame, role_vanillager, role_bystander]
 
 
 def member_selector(game, alive=True, role=None):
@@ -236,13 +236,25 @@ class Activity(polymodel.PolyModel):
                 return []
         return acts.order('created')
 
+
+
 class Message(Activity):
     content = db.TextProperty(required=True)
 
-class Kill(Activity):
+class DeathByVote(Activity):
+    vote_thread = db.ReferenceProperty(Thread,
+                                       required=True,
+                                       collection_name='vote_deaths')
+
+class Save(Activity):
     target = db.ReferenceProperty(Role,
                                   required=True,
-                                  collection_name='received_kills')
+                                  collection_name='received_saves')
+
+class Reveal(Activity):
+    target = db.ReferenceProperty(Role, 
+                                  required=True,
+                                  collection_name='received_reveals')
 
 class Vote(Activity):
     target = db.ReferenceProperty(Role,
