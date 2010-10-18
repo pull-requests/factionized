@@ -3,7 +3,8 @@ from django.shortcuts import redirect
 from google.appengine.api import users
 from app.decorators import login_required
 from app.shortcuts import render, json_encode
-from app.models import Game, Round, Thread, thread_pregame, Role
+from app.models import (Game, Round, Thread, thread_pregame, Role,
+                        role_bystander)
 from datetime import datetime, timedelta
 
 def index(request):
@@ -19,24 +20,12 @@ def index(request):
         values = request.POST
         game = Game(name=values.get('name', 'Unnamed game'),
                     game_starter=request.profile,
-                    signup_deadline=datetime.now() + timedelta(7))
-        game.signups = [request.profile.key()]
+                    signup_deadline=datetime.now() + timedelta(7),
+                    signups=[])
         game.put()
 
-        role = Role(name='Bystander',
-                    game=game,
-                    player=request.profile)
-        role.put()
-
-        # create round 0
-        r = Round(game=game, number=0)
-        r.put()
-
-        # create pre-game thread
-        t = Thread(round=r,
-                   name=thread_pregame,
-                   members=[request.profile.key()])
-        t.put()
+        game.start_pregame()
+        game.add_to_waitlist(request.profile)
 
         # redirect to the game
         return redirect('/games/%s' % game.uid)
