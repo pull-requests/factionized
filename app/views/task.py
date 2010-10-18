@@ -112,7 +112,7 @@ def end(request, game_id, round_id):
                             thread=village_thread)
         death.put()
         
-    r = game.start_next_game_round()
+    r = game.start_next_round()
     assert r.number == round.number + 1 # sanity check
     taskqueue.add(url=reverse('round_end', kw_args={'game_id':game.uid,
                                                     'round_id':r.uid}),

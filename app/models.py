@@ -114,15 +114,22 @@ class Game(UIDModel):
                      game=self)
             r.put()
 
-    def add_random_profile(self, profile):
-        avail_roles = self.role_set.filter('player =', None)
-        if avail_roles:
-            r = random.shuffle(avail_roles)[0]
-            r.player = profile
-            r.put()
-            return r
-        else:
-            raise NoAvailableGameSlotsError, 'player count reached'
+
+    def add_to_waitlist(self, profile):
+        pregame_round = self.get_rounds()
+        if pregame_round or pregame_round[0].number != 0:
+            raise FactionizeError, 'game is not in state to add bystander'
+
+        role = Role(name=role_bystander,
+                    player=profile,
+                    game=self)
+        role.put()
+
+        thread = pregame_round.thread_set.filter('name', thread_pregame)
+        thread.members.append(profile.key())
+        thread.put()
+        self.signups.push(profile.key())
+        self.put()
 
     def get_current_round(self):
         r = self.get_rounds()
@@ -132,31 +139,57 @@ class Game(UIDModel):
             return None
 
     def get_rounds(self):
-        r = Round.all().filter('game =', self)
-        return r.order('-number')
-
+        return Round.round_set.order('-number')
     
     def create_game_threads(self, round):
         # create threads for each of the game threads and 
         # add members to them
-        return [Thread(round=round,
+        threads = [Thread(round=round,
                        name=k,
                        members=v(round.game)) for k,v in \
                 thread_profile_selectors.iteritems()]
 
+        for t in threads:
+            t.put()
 
-    def start_next_game_round(self):
+        return threads
+
+    def start_pre_game(self):
+        last_round = self.get_rounds()
+        if last_round:
+            raise FactionizeError, 'start_pre_game called on a game that is already in or past pregame'
+
+        pregame_round = Round(game=self,
+                              number=0)
+        pregame_round.put()
+        pregame_thread = Thread(name=thread_pregame,
+                                round=pregame_round,
+                                members=[])
+        pregame_thread.put()
+
+
+    def start_game(self):
+        last_round = self.get_rounds()
+        if last_round:
+            if last_round[0].number != 0:
+                raise FactionizeError, 'start_game called on a game that is in progress'
+            self.start_next_round()
+        else:
+            raise FactionizeError, 'start_game called on a game that has no round zero (pregame)'
+
+        self.create_roles()
+        self.start_next_round()
+        
+    def start_next_round(self):
         last_round = self.get_rounds()
         if last_round:
             last_round = last_round[0]
             r = Round(game=self, number=last_round.number+1)
-            threads = self.create_game_threads(r)
-            for t in threads:
-                t.put()
+            self.create_game_threads(r)
             r.put()
             return r
         else:
-            raise FactionizeError, 'start_next_round called on a game has no rounds'
+            raise FactionizeError, 'start_next_round called on a game that has no rounds'
 
 
 class Role(UIDModel):
@@ -180,6 +213,7 @@ class Role(UIDModel):
 
     def kill(self):
         self.is_dead = True
+        self.put()
 
 class Round(UIDModel):
     game = db.ReferenceProperty(Game, required=True)
