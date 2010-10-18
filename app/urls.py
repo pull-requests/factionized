@@ -23,6 +23,8 @@ urlpatterns += patterns('app.views.profile',
 urlpatterns += patterns('app.views.game',
     url(r'^games$', 'index', name='game_index'),
     url(r'^games/(?P<game_id>\w+)$', 'view', name='game_view'),
+    url(r'^games/(?P<game_id>\w+)/start$', 'start', name='game_start'),
+    url(r'^games/(?P<game_id>\w+)/join$', 'join', name='game_join'),
 )
 
 # Activities

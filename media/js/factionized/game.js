@@ -20,8 +20,6 @@
 	var install = function() {
 		api = parent.data('game', {});
 		api.destroy = destroy;
-		api.tabs = {};
-		api.threads = {};
 		install.tabs(install.thread);
 	}
 
@@ -57,6 +55,7 @@
 	};
 
 	install.thread = function(parent, thread) {
+		api.threads = api.threads || {};
 		thread = api.threads[thread.uid] = { raw: thread };
 		thread.log = $('<div />').addClass('fz-log');
 		thread.model = new FZ.Thread(thread.raw,

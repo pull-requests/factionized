@@ -5,13 +5,16 @@
 	<script type="text/javascript" src="/js/factionized/core.js"></script>
 	<script type="text/javascript" src="/js/factionized/models.js"></script>
 	<script type="text/javascript" src="/js/factionized/game.js"></script>
+	<script type="text/javascript" src="/js/factionized/game_controls.js"></script>
 {% endblock %}
 
 {% block canvas %}
 	<h1>{{ game.name }}</h1>
 	<div id="viewport" class="fz-game grid_10"></div>
-	<div class="fz-actions fz-meta grid_2"></div>
+	<div id="viewport-controls" class="fz-actions fz-meta grid_2"></div>
 	<script type="text/javascript">
-		$('#viewport').game({{ serialized|safe }});
+		var init_data = {{ serialized|safe }}
+		$('#viewport').game(init_data);
+		$('#viewport-controls').game_controls(init_data.game);
 	</script>
 {% endblock %}
