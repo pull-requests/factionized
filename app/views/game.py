@@ -3,7 +3,7 @@ from django.shortcuts import redirect
 from google.appengine.api import users
 from app.decorators import login_required
 from app.shortcuts import render
-from app.models import Game, Round, Thread, thread_pregame 
+from app.models import Game, Round, Thread, thread_pregame, Role
 from datetime import datetime, timedelta
 
 def index(request):
@@ -20,7 +20,13 @@ def index(request):
         game = Game(name=values.get('name', 'Unnamed game'),
                     game_starter=request.profile,
                     signup_deadline=datetime.now() + timedelta(7))
+        game.signups = [request.profile.key()]
         game.put()
+
+        role = Role(name='bystander',
+                    game=game,
+                    player=request.profile)
+        role.put()
 
         # create round 0
         r = Round(game=game,
@@ -60,4 +66,8 @@ def join(request, game_id):
     if request.profile.key() not in game.signups:
         game.signups.append(request.profile)
         game.put()
+        r = Role(name='bystander',
+                 game=game,
+                 player=request.profile)
+        r.put()
     return redirect('/game/%s' % game.uid)

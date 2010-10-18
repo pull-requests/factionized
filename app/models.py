@@ -12,8 +12,13 @@ role_vanillager = 'vanillager'
 role_doctor = 'doctor'
 role_sheriff = 'sheriff'
 role_mafia = 'mafia'
+role_bystander = 'bystander'
 
-roles = [role_vanillager, role_doctor, role_sheriff, role_mafia]
+roles = [role_vanillager,
+         role_doctor,
+         role_sheriff,
+         role_mafia,
+         role_bystander]
 
 thread_pregame = 'pregame'
 thread_ghosts = 'ghosts'
@@ -89,24 +94,22 @@ class Game(UIDModel):
             mafia_count = int(ceil(mafia_count))
         else:
             mafia_count = int(floor(mafia_count))
+        innocent_count = player_count - mafia_count
 
-        # create the roles
-        for i in range(mafia_count):
-            r = Role(game=self,
-                     name=role_mafia,
-                     player=self.signups.pop(0))
-            r.put()
+        self.create_role(role_mafia, mafia_count)
+        self.create_role(role_vanillager, innocent_count)
 
-        r = Role(game=self,
-                 name=role_doctor,
-                 player=self.signups.pop(0))
-        r.put()
+        self.create_role(role_doctor)
+        self.create_role(role_sheriff)
 
-        r = Role(game=self,
-                 name=role_sheriff,
-                 player=self.signups.pop(0))
-        r.put()
         self.put()
+
+    def create_role(self, name, count=1):
+        for i in range(count):
+            r = Role(name=name,
+                     player=self.signups.pop(0),
+                     game=self)
+            r.put()
 
     def add_random_profile(self, profile):
         avail_roles = self.role_set.filter('player =', None)
@@ -153,18 +156,7 @@ class Game(UIDModel):
             raise FactionizeError, 'start_next_round called on a game has no rounds'
 
 
-class Role(polymodel.PolyModel):
-
-    def __init__(self, *args, **kw):
-        if not 'key_name' in kw and not '_from_entity' in kw:
-            kw['key_name'] = new_uid()
-
-        super(Role, self).__init__(*args, **kw)
-
-        if not '_from_entity' in kw:
-            self.uid = kw['key_name']
-
-    uid = db.StringProperty()
+class Role(UIDModel):
     name = db.StringProperty(choices=roles, required=True)
     game = db.ReferenceProperty(Game, required=True)
     player = db.ReferenceProperty(Profile, default=None, required=True)
@@ -230,13 +222,19 @@ class Activity(polymodel.PolyModel):
     thread = db.ReferenceProperty(Thread, required=True)
 
     @classmethod
-    def get_activities(cls, user, thread):
+    def get_activities(cls, user, thread, since=None):
         if isinstance(thread, basestring):
             thread = Thread.get_by_uid(thread)
-        acts = cls.all().filter('thread', thread)
-        acts = acts.order('created')
-        return acts
 
+        acts = cls.all().filter('thread', thread)
+
+        if since:
+            last = cls.get_by_uid(since)
+            if last and last.thread == thread:
+                acts.filter('created >', last.created)
+            else:
+                return []
+        return acts.order('created')
 
 class Message(Activity):
     content = db.TextProperty(required=True)
