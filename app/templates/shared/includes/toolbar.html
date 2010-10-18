@@ -1,17 +1,17 @@
 <div id="header" class="container_12">
-    <div class="grid_1 masthead"><a href="/">Factionize</a></div>
-    <div class="grid_1"><a href="/games">Games</a></div>
-    {% if user %}
-    <div class="grid_1 prefix_7 authlink">
-        <a href="/profile/{{ profile.uid }}">{{user.nickname}}</a>
-    </div>
-    <div class="grid_1 prefix_1 authlink">
-        <a href="{{ logout_url }}">Sign out</a>
-    </div>
-    {% else %}
-    <div class="grid_1 prefix_9 authlink">
-        <a href="{{ login_url }}">Sign in</a>
-    </div>
-    {% endif %}
-    <div class="clear"></div>
+	<div class="grid_1 masthead"><a href="/">Factionize</a></div>
+	<div class="grid_1"><a href="/games">Games</a></div>
+	{% if user %}
+	<div class="grid_1 prefix_7 authlink">
+		<a href="/profile/{{ profile.uid }}">{{user.nickname}}</a>
+	</div>
+	<div class="grid_1 prefix_1 authlink">
+		<a href="{{ logout_url }}">Sign out</a>
+	</div>
+	{% else %}
+	<div class="grid_1 prefix_9 authlink">
+		<a href="{{ login_url }}">Sign in</a>
+	</div>
+	{% endif %}
+	<div class="clear"></div>
 </div>

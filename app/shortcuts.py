@@ -22,7 +22,7 @@ class ModelEncoder(json_mod.JSONEncoder):
         if isinstance(obj, datetime):
             return time.mktime(obj.timetuple())
         if isinstance(obj, db.Key):
-            return
+            return obj.name()
         if isinstance(obj, db.Query):
             obj = obj.get() or []
         if isinstance(obj, list) and len(obj) < 1:
@@ -41,6 +41,8 @@ class ModelEncoder(json_mod.JSONEncoder):
         else:
             return super(ModelEncoder, self).default(obj)
 
+def json_encode(data):
+    return json_mod.dumps(data, cls=ModelEncoder)
+
 def json(data):
-    json_data = json_mod.dumps(data, cls=ModelEncoder)
-    return HttpResponse(json_data, 'application/json')
+    return HttpResponse(json_encode(data), 'application/json')

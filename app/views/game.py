@@ -2,7 +2,7 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from google.appengine.api import users
 from app.decorators import login_required
-from app.shortcuts import render
+from app.shortcuts import render, json_encode
 from app.models import Game, Round, Thread, thread_pregame, Role
 from datetime import datetime, timedelta
 
@@ -23,18 +23,19 @@ def index(request):
         game.signups = [request.profile.key()]
         game.put()
 
-        role = Role(name='bystander',
+        role = Role(name='Bystander',
                     game=game,
                     player=request.profile)
         role.put()
 
         # create round 0
-        r = Round(game=game,
-                  number=0)
+        r = Round(game=game, number=0)
         r.put()
 
         # create pre-game thread
-        t = Thread(round=r, name=thread_pregame)
+        t = Thread(round=r,
+                   name=thread_pregame,
+                   members=[request.profile.key()])
         t.put()
 
         # redirect to the game
@@ -48,11 +49,12 @@ def view(request, game_id):
     current_round = game.get_current_round()
     rounds = game.get_rounds()
     threads = current_round.get_threads(request.profile)
-    return render('game/view.html',
-                  dict(game=game,
-                       current_round=current_round,
-                       rounds=rounds,
-                       threads=threads))
+    context = dict(game=game,
+                   current_round=current_round,
+                   rounds=rounds,
+                   threads=threads)
+    context['serialized'] = json_encode(context)
+    return render('game/view.html', context)
 
 @login_required
 def join(request, game_id):

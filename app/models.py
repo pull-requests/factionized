@@ -8,11 +8,11 @@ from app.exc import FactionizeError, NoAvailableGameSlotsError
 from math import ceil, floor
 from random import random
 
-role_vanillager = 'vanillager'
-role_doctor = 'doctor'
-role_sheriff = 'sheriff'
-role_mafia = 'mafia'
-role_bystander = 'bystander'
+role_vanillager = 'Vanillager'
+role_doctor = 'Doctor'
+role_sheriff = 'Sheriff'
+role_mafia = 'Mafia'
+role_bystander = 'Bystander'
 
 roles = [role_vanillager,
          role_doctor,
@@ -20,8 +20,8 @@ roles = [role_vanillager,
          role_mafia,
          role_bystander]
 
-thread_pregame = 'pregame'
-thread_ghosts = 'ghosts'
+thread_pregame = 'Pre-Game'
+thread_ghosts = 'Ghost'
 threads = [role_vanillager, role_doctor, role_sheriff, role_mafia,
            role_bystander, thread_pregame, thread_ghosts]
 public_threads = [thread_pregame, role_vanillager, role_bystander]

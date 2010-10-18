@@ -1,7 +1,16 @@
 {% extends 'shared/layouts/canvas.html' %}
 
+{% block js_includes %}
+	{% include 'shared/includes/js_gaming.html' %}
+	<script type="text/javascript" src="/js/factionized/core.js"></script>
+	<script type="text/javascript" src="/js/factionized/models.js"></script>
+	<script type="text/javascript" src="/js/factionized/game.js"></script>
+{% endblock %}
+
 {% block canvas %}
-	<h1>Game</h1>
-	<p>A game</p>
-	{{ game.name }}
+	<h1>{{ game.name }}</h1>
+	<div id="viewport"></div>
+	<script type="text/javascript">
+		$('#viewport').game({{ serialized|safe }});
+	</script>
 {% endblock %}

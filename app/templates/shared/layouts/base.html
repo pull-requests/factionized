@@ -3,11 +3,13 @@
 	<head>
 		{% block head %}
 			<title>{% block head_title %}Factionized{% endblock %}</title>
-			{% block head_css %}
+			{% block css %}
 				{% include 'shared/includes/css.html' %}
+				{% block css_includes %}{% endblock %}
 			{% endblock %}
-			{% block head_js %}
+			{% block js %}
 				{% include 'shared/includes/js.html' %}
+				{% block js_includes %}{% endblock %}
 			{% endblock %}
 		{% endblock %}
 	</head>
