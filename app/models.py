@@ -3,7 +3,7 @@ from google.appengine.ext.db import polymodel
 
 from app.lib.uid import new_uid
 
-from app.exc import NoAvailableGameSlotsError
+from app.exc import FactionizeError, NoAvailableGameSlotsError
 
 from math import ceil, floor
 from random import random
@@ -20,6 +20,28 @@ thread_ghosts = 'ghosts'
 threads = [role_vanillager, role_doctor, role_sheriff, role_mafia,
            thread_pregame, thread_ghosts]
 public_threads = [thread_pregame, role_vanillager]
+
+
+def member_selector(game, alive=True, role=None):
+    q = game.role_set
+    if alive is not None:
+        q = q.filter('is_dead', not alive)
+    if role:
+        q = q.filter('name', role)
+
+    return [r.player.key() for r in q]
+
+vanillager_selector = lambda game : member_selector(game)
+mafia_selector = lambda game: member_selector(game, role=role_mafia)
+sheriff_selector = lambda game: member_selector(game, role=role_sheriff)
+doctor_selector = lambda game: member_selector(game, role=role_doctor)
+dead_selector = lambda game: member_selector(game, alive=False)
+
+thread_profile_selectors = {role_vanillager: vanillager_selector,
+                           role_mafia: mafia_selector,
+                           role_sheriff: sheriff_selector,
+                           role_doctor: doctor_selector,
+                           thread_ghosts: dead_selector}
 
 class UIDModel(db.Model):
     """Base class to give models a nicer, URL friendly ID.
@@ -70,25 +92,20 @@ class Game(UIDModel):
 
         # create the roles
         for i in range(mafia_count):
-            r = Role()
-            r.name = role_mafia
-            r.player = self.signups.pop(0)
-            r.game = self
+            r = Role(game=self,
+                     name=role_mafia,
+                     player=self.signups.pop(0))
             r.put()
 
-        if self.has_doctor:
-            r = Role()
-            r.name = role_doctor
-            r.player = self.signups.pop(0)
-            r.game = self
-            r.put()
+        r = Role(game=self,
+                 name=role_doctor,
+                 player=self.signups.pop(0))
+        r.put()
 
-        if self.has_sherrif:
-            r = Role()
-            r.name = role_sheriff
-            r.player = self.signups.pop(0)
-            r.game = self
-            r.put()
+        r = Role(game=self,
+                 name=role_sheriff,
+                 player=self.signups.pop(0))
+        r.put()
         self.put()
 
     def add_random_profile(self, profile):
@@ -111,6 +128,29 @@ class Game(UIDModel):
     def get_rounds(self):
         r = Round.all().filter('game =', self)
         return r.order('-number')
+
+    
+    def create_game_threads(self, round):
+        # create threads for each of the game threads and 
+        # add members to them
+        return [Thread(round=round,
+                       name=k,
+                       members=v(round.game)) for k,v in \
+                thread_profile_selectors.iteritems()]
+
+
+    def start_next_game_round(self):
+        last_round = self.get_rounds()
+        if last_round:
+            last_round = last_round[0]
+            r = Round(game=self, number=last_round.number+1)
+            threads = self.create_game_threads(r)
+            for t in threads:
+                t.put()
+            r.put()
+            return r
+        else:
+            raise FactionizeError, 'start_next_round called on a game has no rounds'
 
 
 class Role(polymodel.PolyModel):
@@ -142,6 +182,9 @@ class Role(polymodel.PolyModel):
             return r[0]
         except IndexError, e:
             return None
+
+    def kill(self):
+        self.is_dead = True
 
 class Round(UIDModel):
     game = db.ReferenceProperty(Game, required=True)
