@@ -28,6 +28,7 @@ urlpatterns += patterns('app.views.game',
 # Activities
 urlpatterns += patterns('app.views.activity',
     url(r'^games/(?P<game_id>\w+)/rounds/(?P<round_id>\w+)/threads/(?P<thread_id>\w+)/activities$', 'activities', name='activity_list'),
+    url(r'^games/(?P<game_id>\w+)/rounds/(?P<round_id>\w+)/threads/(?P<thread_id>\w+)/activities/stream$', 'stream', name='activity_stream'),
     url(r'^games/(?P<game_id>\w+)/rounds/(?P<round_id>\w+)/threads/(?P<thread_id>\w+)/votes$', 'votes', name='vote_list'),
     url(r'^games/(?P<game_id>\w+)/rounds/(?P<round_id>\w+)/threads/(?P<thread_id>\w+)/messages$', 'messages', name='message_list'),
 )

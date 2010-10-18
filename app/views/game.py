@@ -49,7 +49,8 @@ def view(request, game_id):
     rounds = game.get_rounds()
     threads = current_round.get_threads(request.profile)
     return render('game/view.html',
-                  dict(current_round=current_round,
+                  dict(game=game,
+                       current_round=current_round,
                        rounds=rounds,
                        threads=threads))
 
