@@ -1,0 +1,19 @@
+{% extends 'shared/layouts/canvas.html' %}
+
+{% block canvas %}
+	<div class="page_header">
+		<h1>{{ user.email }}</h1>
+		<a href="{% url app.views.auth.logout %}">Logout</a>
+	</div>
+	<div id="games_pane">
+		<h1>Games</h1>
+		<span>Games go here</span>
+	</div>
+	<div id="awards_pane">
+		<h1>Awards</h1>
+		<span>Awards go here</span>
+	</div>
+	<div>
+		{{ params.message }}<br />{{ params.image }}<br />{{ params.link}}
+	</div>
+{% endblock %}

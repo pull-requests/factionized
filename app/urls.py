@@ -16,6 +16,9 @@ urlpatterns += patterns('app.views.profile',
     url(r'^profile$', 'index', name='profile_index'),
     url(r'^profile/edit$', 'edit', name='profile_edit'),
     url(r'^profile/edit(?P<code>\w+)$', 'edit', name='profile_edit'),
+    url(r'^profile/facebook/auth$', 'facebook_auth', name='facebook_auth'),
+    url(r'^profile/twitter/auth$', 'twitter_auth', name='twitter_auth'),
+    url(r'^profile/(?P<service_name>\w+)/feed$', 'service_feed', name='service_feed'),
     url(r'^profile/(?P<profile_id>\w+)$', 'show', name='profile_show')
 )
 

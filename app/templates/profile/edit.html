@@ -11,33 +11,74 @@
 	</div>
 	<div id="awards_pane">
 		<h1>Awards</h1>
-		<span>Awards go here</span>
+		{% for level in bd_end_user.levels %}
+		<div id="fz-level">
+			<img id="fz-level-image" src={{ level.url }} height="200px" width="200px" /><br />
+			<label for="fz-level-image">{{ level.end_user_title }}</label><br />
+			<span id="fz-level-description">{{ level.end_user_description }}</span>
+			{% ifequal profile.fb_auth 1 %}
+			<form method="post" action="http://www.factionized.com/profile/facebook/feed">
+				<fieldset>
+				{% csrf_token %}
+					<input type="hidden"
+						   name="message"
+						   value="{{ level.end_user_title }}" />
+					<input type="hidden"
+						   name="image_url"
+						   value="{{ level.url }}" />
+					<input type="hidden"
+						   name="caption"
+						   value="{{ level.end_user_description }}" />
+					<button type="button" class="fz-facebook-post fz-button">Post it!</button>
+				</fieldset>
+			</form>
+			{% endifequal %}
+		</div>
+		{% endfor %}
 	</div>
 	<div id="facebook_pane">
 		<h1>Facebook</h1>
-		{% ifequal profile.fb_auth 1 %}
-		<p>Authenticated Facebook activities go here!</p>
-		{% else %}
+		{% ifequal profile.fb_auth 0 %}
 		<div id="facebook_auth">
-			<p>Post your achievements to your wall!</p>
-			<fb:login-button perms="publish_stream,offline_access,read_friendlists"></fb:login-button>
-			<div id="fb-root"></div>
-				<script src="http://connect.facebook.net/en_US/all.js"></script>
-				<script>
-					window.fbAsyncInit = function() {
-						FB.init({appId: {{ fb_app_id }}, status: true, cookie: true,
-								 xfbml: true});
-					};
-					(function() {
-						var e = document.createElement('script');
-						e.type = 'text/javascript';
-						e.src = document.location.protocol +
-								'//connect.facebook.net/en_US/all.js';
-						e.async = true;
-						document.getElementById('fb-root').appendChild(e);
-					}());
-				</script>
+			<span>Unauthenticated Facebook activities go here!</span>
+			<script type="text/javascript">
+				var chk_timer,fb_auth_window;
+				function fb_auth() {
+					fb_auth_window = window.open("http://www.factionized.com/profile/facebook/auth",
+												 "Link Facebook with your Factionized account.",
+												 "width=1000,height=650,scrollbars=no");
+					chk_timer = setInterval("fb_auth_window_chk_closed()",1000);
+				};
+				function fb_auth_window_chk_closed() {
+					if (fb_auth_window && fb_auth_window.closed) {
+						clearInterval(chk_timer);
+						window.location.reload();
+					}
+				};
+				$(document).ready(function() {
+					$('.fz-button.fz-facebook').click(function(e) {
+						fb_auth();
+						return false;
+					});
+				});
+			</script>
+			<a href="javascript:void(0)" class="fz-facebook fz-button">Link to Facebook</a>
 		</div>
+		{% else %}
+		<!-- This really needs to provide feedback -->
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('.fz-button.fz-facebook-post').click(function(e) {
+					var values = {}
+					$('input').each(function() {values[this.name] = $(this).val();});
+					$.ajax({url: "http://www.factionized.com/profile/facebook/feed",
+							context: document.body,
+							type: "POST",
+							data: values,
+							success: function(data) {return false;}});
+				});
+			});
+		</script>
 		{% endifequal %}
 	</div>
 {% endblock %}
