@@ -98,7 +98,7 @@ class Game(UIDModel):
             mafia_count = int(ceil(mafia_count))
         else:
             mafia_count = int(floor(mafia_count))
-        innocent_count = player_count - mafia_count + 2 # to include specials
+        innocent_count = player_count - (mafia_count + 2) # to include specials
 
         self.create_role(role_mafia, count=mafia_count)
         self.create_role(role_doctor)
@@ -192,11 +192,9 @@ class Game(UIDModel):
             raise FactionizeError, 'not enough players to start game'
 
         last_round = self.get_rounds()
-        if last_round.count():
-            if last_round[0].number != 0:
-                raise FactionizeError, 'start_game called on a game that is in progress'
-            self.start_next_round()
-        else:
+        if last_round.count() and last_round[0].number != 0:
+            raise FactionizeError, 'start_game called on a game that is in progress'
+        elif not last_round.count():
             raise FactionizeError, 'start_game called on a game that has no round zero (pregame)'
 
         self.create_roles()
@@ -241,7 +239,7 @@ class Round(UIDModel):
     def get_threads(self, profile):
         return list(self.thread_set.filter('members', profile))
 
-    def get_thead(self, name):
+    def get_thread(self, name):
         return self.thread_set.filter('name', name).get()
 
     def length(self):

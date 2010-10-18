@@ -64,7 +64,7 @@ def join(request, game_id):
 @login_required
 def start(request, game_id):
     game = Game.get_by_uid(game_id)
-    if game.game_starter != request.profile:
+    if game.game_starter.uid != request.profile.uid:
         return HttpResponse(status=403)
 
     now = datetime.now()
