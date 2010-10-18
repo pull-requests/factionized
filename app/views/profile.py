@@ -27,12 +27,13 @@ def index(request, profile_id=None):
 def show(request, profile_id):
     profile = Profile.all().filter('uid =', profile_id).get()
     #bd_end_user = EndUser(end_user_login=profile.uid)
+    bd_end_user = return_fake_end_user(profile)
 
     if profile.uid == request.profile.uid:
         is_editable = True
-        return render('profile/show.html', {'bd_end_user':None, 'is_editable':is_editable})
+        return render('profile/show.html', {'bd_end_user':bd_end_user, 'is_editable':is_editable})
 
-    return render('profile/show.html', {'bd_end_user':None})
+    return render('profile/show.html', {'bd_end_user':bd_end_user})
 
 @login_required
 def edit(request):
