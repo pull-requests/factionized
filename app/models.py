@@ -98,14 +98,14 @@ class Game(UIDModel):
             mafia_count = int(ceil(mafia_count))
         else:
             mafia_count = int(floor(mafia_count))
-        innocent_count = player_count - mafia_count
+        innocent_count = player_count - mafia_count + 2 # to include specials
 
-        self.create_role(role_mafia, mafia_count)
-        self.create_role(role_vanillager, innocent_count)
-
+        self.create_role(role_mafia, count=mafia_count)
         self.create_role(role_doctor)
         self.create_role(role_sheriff)
 
+        self.create_role(role_vanillager, count=innocent_count)
+        
         self.put()
 
     def create_role(self, name, count=1):
