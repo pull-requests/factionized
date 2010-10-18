@@ -16,8 +16,19 @@ indexes:
   - name: thread
   - name: created
 
+- kind: Role
+  properties:
+  - name: game
+  - name: name
+
 - kind: Round
   properties:
   - name: game
   - name: number
+    direction: desc
+
+- kind: VoteSummary
+  properties:
+  - name: thread
+  - name: total
     direction: desc

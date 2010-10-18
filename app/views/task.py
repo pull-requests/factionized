@@ -3,13 +3,14 @@ import logging
 from datetime import datetime
 
 from google.appengine.api.labs import taskqueue
+from google.appengine.ext import db
 
 from django.core.urlresolvers import reverse
 
 from app.exc import FactionizeTaskException
 from app.models import (Round, VoteSummary, Save, DeathByVote, Reveal, 
-                        role_vanillager, role_sheriff, role_doctor, 
-                        role_mafia, roles)
+                        Profile, role_bystander, role_vanillager, 
+                        role_sheriff, role_doctor, role_mafia, roles)
 
 import random
 
@@ -17,12 +18,15 @@ def get_thread_highest_vote(thread):
     vote_summary = thread.votesummary_set.order('-total')
     results = filter(lambda x: x.count == vote_summary[0].count,
                      vote_summary)
-    results = random.shuffle(results)
+    random.shuffle(results)
     if len(results):
         return results[0].role
     else:
         # we will randomly kill someone now
-        return random.shuffle(thread.members)[0].get()
+        random_members = [i for i in thread.members]
+        random.shuffle(random_members)
+        unlucky_player = db.get(random_members[0])
+        return thread.round.game.role_set.filter('name !=', role_bystander).get()
 
 def kill_in_threads(role, threads):
     for t in threads:
@@ -61,7 +65,7 @@ def end(request, game_id, round_id):
     round = Round.all().filter('uid', round_id).get()
     game = round.game
 
-    if not round == game.current_round():
+    if not round.uid == game.get_current_round().uid:
         raise FactionizeTaskException, 'Round argument is not the current round. Check if task has been repeated'
 
     village_thread = round.get_thread(role_vanillager)
@@ -70,14 +74,14 @@ def end(request, game_id, round_id):
     mafia_thread = round.get_thread(role_mafia)
 
     vote_death_role = get_thread_highest_vote(village_thread)
-    logging.debug('game:%s round:%s vote kill role_id:%s (%s) ' + \
-                  'profile_name:%s google_id:%s' % \
+    logging.debug(('game:%s round:%s vote kill role_id:%s (%s) ' + \
+                  'profile_name:%s google_id:%s') % \
                     (game.uid,
                      round.uid,
-                     vote_death_role.id, 
+                     vote_death_role.uid, 
                      vote_death_role.name, 
-                     vote_death_role.profile.name,
-                     vote_death_role.profile.user.user_id()))
+                     vote_death_role.player.name,
+                     vote_death_role.player.user.user_id()))
 
     if vote_death_role.name in [role_sheriff, role_doctor]:
         kill_in_threads(vote_death_role, [doctor_thread, sheriff_thread])
@@ -102,8 +106,8 @@ def end(request, game_id, round_id):
         revealers = filter_invalidated(sheriff_thread.vote_set)
         for r in revealers:
 
-            logging.debug('game:%s round:%s sheriff reveal actor:%s ' + \
-                          'target:%s role:%s' % \
+            logging.debug(('game:%s round:%s sheriff reveal actor:%s ' + \
+                          'target:%s role:%s') % \
                             (game.uid, 
                              round.uid,
                              r.actor.uid,
@@ -137,14 +141,14 @@ def end(request, game_id, round_id):
                         thread=village_thread)
             save.put()
     else:
-        logging.debug('game:%s round:%s mafia kill role_id:%s (%s) ' + \
-                      'profile_name:%s google_id:%s' % \
+        logging.debug(('game:%s round:%s mafia kill role_id:%s (%s) ' + \
+                      'profile_name:%s google_id:%s') % \
                       (game.uid,
                        round.uid,
-                       mafia_vote_death.id, 
+                       mafia_vote_death.uid, 
                        mafia_vote_death.name, 
-                       mafia_vote_death.profile.name,
-                       mafia_vote_death.profile.user.user_id()))
+                       mafia_vote_death.player.name,
+                       mafia_vote_death.player.user.user_id()))
 
         mafia_vote_death.kill()
         death = DeathByVote(actor=mafia_vote_death,
@@ -156,7 +160,7 @@ def end(request, game_id, round_id):
     r = game.start_next_round()
     logging.debug('game:%s started new round:%s' % (game.uid, r.uid))
     assert r.number == round.number + 1 # sanity check
-    taskqueue.add(url=reverse('round_end', kw_args={'game_id':game.uid,
+    taskqueue.add(url=reverse('round_end', kwargs={'game_id':game.uid,
                                                     'round_id':r.uid}),
                   method='POST',
                   countdown=r.length())
