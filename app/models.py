@@ -5,6 +5,7 @@ from app.lib.uid import new_uid
 
 from app.exc import FactionizeError, NoAvailableGameSlotsError
 
+from datetime import datetime
 from math import ceil, floor
 from random import random
 
@@ -114,12 +115,15 @@ class Game(UIDModel):
                      game=self)
             r.put()
 
-
     def add_to_waitlist(self, profile):
+
         pregame_round = self.get_rounds()
         if not pregame_round.count() or pregame_round[0].number != 0:
             raise FactionizeError, 'game is not in state to add bystander'
         pregame_round = pregame_round[0]
+
+        if profile.key() in self.signups:
+            raise FactionizeError, 'profile is already in the waitlist'
 
         role = Role(name=role_bystander,
                     player=profile,
@@ -131,6 +135,10 @@ class Game(UIDModel):
         thread.put()
         self.signups.append(profile.key())
         self.put()
+
+        join_actvity = PlayerJoin(actor=role,
+                                  thread=thread)
+        join.put()
 
     def get_current_round(self):
         r = self.get_rounds()
@@ -170,6 +178,9 @@ class Game(UIDModel):
 
 
     def start_game(self):
+        if len(self.signups) < self.min_players:
+            raise FactionizeError, 'not enough players to start game'
+
         last_round = self.get_rounds()
         if last_round.count():
             if last_round[0].number != 0:
@@ -180,6 +191,8 @@ class Game(UIDModel):
 
         self.create_roles()
         self.start_next_round()
+        self.started = datetime.now()
+        self.put()
         
     def start_next_round(self):
         last_round = self.get_rounds()
@@ -323,6 +336,8 @@ class Vote(Activity):
         s.total -= 1
         s.put()
 
+class PlayerJoin(Activity):
+    pass
 
 class RoundEnd(Activity):
     pass

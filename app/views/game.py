@@ -56,10 +56,5 @@ def join(request, game_id):
         return HttpResponse(status=401)
 
     if request.profile.key() not in game.signups:
-        game.signups.append(request.profile)
-        game.put()
-        r = Role(name='bystander',
-                 game=game,
-                 player=request.profile)
-        r.put()
+        game.add_to_waitlist(request.profile)
     return redirect('/game/%s' % game.uid)
