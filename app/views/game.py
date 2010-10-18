@@ -61,7 +61,7 @@ def join(request, game_id):
 
     if request.profile.key() not in game.signups:
         game.add_to_waitlist(request.profile)
-    return redirect('/game/%s' % game.uid)
+    return redirect('/games/%s' % game.uid)
 
 @login_required
 def start(request, game_id):

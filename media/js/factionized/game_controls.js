@@ -15,8 +15,7 @@
 				click(function() { start_game(game) }).
 				appendTo(parent);
 		}
-		if( _.first(game.signups, profile.uid) ) {
-			
+		if( _.first(game.signups, profile.uid).length > 0 ) {
 			$('<span />').
 				append(
 					game.game_starter.uid == profile.uid ?
@@ -30,7 +29,7 @@
 				attr('href', 'javascript:void(0)').
 				append('Join Game').
 				click(function() { join_game(game, profile); }).
-				apendTo(parent);
+				appendTo(parent);
 		}
 	}
 
@@ -41,7 +40,9 @@
 	}
 
 	var join_game = function(game) {
-		$.post('/games/' + game.uid + '/join', function() {
+		var path = '/games/' + game.uid + '/join';
+		console.log(path);
+		$.post(game, function() {
 			console.log('User Joined game');
 		});
 	}
