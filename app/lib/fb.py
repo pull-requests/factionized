@@ -1,17 +1,17 @@
-import facebook
+from app.lib import facebook
 import json
+from django.conf import settings
 
 from app.models import Profile
 FACTIONIZE_URL = 'http://www.factionize.com'
 
-FACEBOOK_APP_ID = '6977d97b393a2181f5d1cd8fd76f643b'
-FACEBOOK_APP_SECRET = 'abca90b7623f2d0c6b83e2809dbe6345'
+class FacebookUser(object):
 
-class FacebookUser(object)
     def __init__(self,profile):
-        pass
+        self.graph = facebook.GraphAPI(profile.fb_token)
+        #user = self.graph.get_object("me")
 
-    def post_to_wall(self,message,image_url):
+    def post_to_wall(self,message,image_url,link,caption=None):
         """Post message/image_url to profile.fb_user's wall
 
         {"name": "Link name",
@@ -20,6 +20,7 @@ class FacebookUser(object)
         "description": "This is a longer description of the attachment",
         "picture": "http://www.example.com/thumbnail.jpg"}
         """
-        post_data = {"message":message,
-                     "picture":image_url,
-                     "link":FACTIONIZE_URL}
+        put_data = {"picture":image_url,
+                    "caption":caption,
+                    "link":link}
+        self.graph.put_wall_post(message,attachment=put_data,profile_id="me")
