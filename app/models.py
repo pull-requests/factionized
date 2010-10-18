@@ -86,6 +86,11 @@ class Game(UIDModel):
     signups = db.ListProperty(db.Key)
     started = db.DateTimeProperty()
 
+    def get_player_list(self):
+        role_query = self.role_set.filter('name !=', role_bystander)
+        role_query = role_query.filter('is_dead', False)
+        return [r.profile for r in role_query]
+
     def create_roles(self):
         # find out how many players there are
         player_count = len(self.signups)

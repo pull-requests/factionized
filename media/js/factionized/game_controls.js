@@ -15,7 +15,7 @@
 				click(function() { start_game(game) }).
 				appendTo(parent);
 		}
-		if( _.first(game.signups, profile.uid).length > 0 ) {
+		if( _.indexOf(game.signups, profile.uid) >= 0 ) {
 			$('<span />').
 				append(
 					game.game_starter.uid == profile.uid ?

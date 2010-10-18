@@ -19,6 +19,12 @@ indexes:
 - kind: Role
   properties:
   - name: game
+  - name: is_dead
+  - name: name
+
+- kind: Role
+  properties:
+  - name: game
   - name: name
 
 - kind: Round
