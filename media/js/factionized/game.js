@@ -79,7 +79,10 @@
 				)
 			);
 		thread.model.onmessage.bind(function(message) {
-			thread.log.append(message);
+			$('<div />').
+				addClass('fz-message').
+				append(message).
+				appendTo(thread.log);
 		});
 		thread.input.wrap('<div class="fz-textarea fz-wrapper"></div>');
 	};
