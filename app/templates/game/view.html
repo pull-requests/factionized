@@ -9,7 +9,8 @@
 
 {% block canvas %}
 	<h1>{{ game.name }}</h1>
-	<div id="viewport"></div>
+	<div id="viewport" class="fz-game grid_10"></div>
+	<div class="fz-actions fz-meta grid_2"></div>
 	<script type="text/javascript">
 		$('#viewport').game({{ serialized|safe }});
 	</script>
