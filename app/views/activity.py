@@ -5,7 +5,7 @@ from app.models import Activity, Message, Vote, Thread, Role, Game
 from app.shortcuts import json
 
 def activities(request, game_id, round_id, thread_id):
-    thread = Thead.get_by_uid(thread_id)
+    thread = Thread.get_by_uid(thread_id)
     if thread is None:
         raise Http404
 
@@ -20,7 +20,7 @@ def activities(request, game_id, round_id, thread_id):
 
 
 def votes(request, game_id, round_id, thread_id):
-    thread = Thead.get_by_uid(thread_id)
+    thread = Thread.get_by_uid(thread_id)
     if thread is None:
         raise Http404
 
@@ -100,7 +100,7 @@ def messages(request, game_id, round_id, thread_id):
     return HttpResponse('Method Not Allowed', status=405)
 
 def stream(request, game_id, round_id, thread_id):
-    thread = Thead.get_by_uid(thread_id)
+    thread = Thread.get_by_uid(thread_id)
     if thread is None:
         raise Http404
 
