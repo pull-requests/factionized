@@ -10,9 +10,13 @@
 {% endblock %}
 
 {% block canvas %}
-	<h1>{{ game.name }}</h1>
-	<div id="viewport" class="fz-game grid_10"></div>
-	<div id="viewport-controls" class="fz-actions fz-meta grid_2"></div>
+	<h1 class="grid_12">{{ game.name }}</h1>
+    <div class="grid_9">
+        <div id="viewport" class="fz-game"></div>
+    </div>
+    <div class="grid_3 sidebar">
+        <div id="viewport-controls" class="fz-actions fz-meta tinywrapper"></div>
+    </div>
 	<script type="text/javascript">
 		var init_data = {{ serialized|safe }}
 		$('#viewport').game(init_data);

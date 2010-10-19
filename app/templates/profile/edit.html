@@ -1,21 +1,22 @@
 {% extends 'shared/layouts/canvas.html' %}
 
 {% block canvas %}
-	<div class="page_header">
-		<h1>{{ user.email }}</h1>
-		<a href="{% url app.views.auth.logout %}">Logout</a>
+	<div class="grid_12 page_header">
+		<h2>Edit your profile</h2>
 	</div>
-	<div id="games_pane">
-		<h1>Games</h1>
-		<span>Games go here</span>
+	<div class="grid_12" id="games_pane">
+		<h2>Games</h2>
+		<div class="subhead">Games go here</div>
 	</div>
-	<div id="awards_pane">
-		<h1>Awards</h1>
+	<div class="grid_12"  id="awards_pane">
+        <h2>Awards</h2>
+        <div class="subhead">Awards go here</div>
 		{% for level in bd_end_user.levels %}
 		<div id="fz-level">
-			<img id="fz-level-image" src={{ level.url }} height="200px" width="200px" /><br />
-			<label for="fz-level-image">{{ level.end_user_title }}</label><br />
-			<span id="fz-level-description">{{ level.end_user_description }}</span>
+            <div class="levelwrapper">
+            <img id="fz-level-image" src={{ level.url }} height="200px" width="200px" /><br />
+            <div id="fz-level-label"><label for="fz-level-image">{{ level.end_user_title }}</label></div>
+			<div id="fz-level-description">{{ level.end_user_description }}</div>
 			{% ifequal profile.fb_auth 1 %}
 			<form method="post" action="http://www.factionized.com/profile/facebook/feed">
 				<fieldset>
@@ -33,11 +34,12 @@
 				</fieldset>
 			</form>
 			{% endifequal %}
-		</div>
+            </div>
+        </div>
 		{% endfor %}
 	</div>
-	<div id="facebook_pane">
-		<h1>Facebook</h1>
+	<div class="grid_12" id="facebook_pane">
+		<h2>Facebook</h2>
 		{% ifequal profile.fb_auth 0 %}
 		<div id="facebook_auth">
 			<span>Unauthenticated Facebook activities go here!</span>

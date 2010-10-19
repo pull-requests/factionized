@@ -1,18 +1,28 @@
 {% extends 'shared/layouts/canvas.html' %}
 
 {% block canvas %}
-	<div id="games_pane" class="grid_12 pane">
-		<h1>Games</h1>
-		<span>Games go here</span>
+
+    {% if is_editable %}
+        <div id="edit_pane" class="grid_12 pane">
+            <a href="/profile/edit" class="fz-button">Edit your profile</a>
+        </div>
+    {% endif %}
+
+
+
+    <div id="games_pane" class="grid_12 pane">
+		<h2>Games</h2>
+		<div class="subhead">Games go <a href="s">here</a></div>
 	</div>
 	<div id="awards_pane" class="grid_12 pane">
-		<h1>Awards</h1>
-		<span>Awards go here</span>
+		<h2>Awards</h2>
+		<div class="subhead">Awards go here</div>
 		{% for level in bd_end_user.levels %}
-		<div id="fz-level">
-			<img id="fz-level-image" src={{ level.url }} height="200px" width="200px" /><br />
-			<label for="fz-level-image">{{ level.end_user_title }}</label><br />
-			<span id="fz-level-description">{{ level.end_user_description }}</span>
+        <div id="fz-level">
+            <div class="levelwrapper">
+			<img id="fz-level-image" src={{ level.url }} height="200px" width="200px" />
+            <div id="fz-level-label"><label for="fz-level-image">{{ level.end_user_title }}</label></div>
+			<div id="fz-level-description">{{ level.end_user_description }}</div>
 			{% ifequal profile.fb_auth 1 %}
 			<form method="post" action="http://www.factionized.com/profile/facebook/feed">
 				<fieldset>
@@ -29,14 +39,10 @@
 					<button type="button" class="fz-facebook-post fz-button">Post it!</button>
 				</fieldset>
 			</form>
-			{% endifequal %}
+            {% endifequal %}
+            </div>
 		</div>
 		{% endfor %}
 
 	</div>
-	{% if is_editable %}
-	<div id="edit_pane" class="grid_12 pane">
-		<a href="/profile/edit" class="fz-button">Edit</a>
-	</div>
-	{% endif %}
 {% endblock %}
