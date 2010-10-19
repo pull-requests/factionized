@@ -64,4 +64,9 @@ indexes:
   properties:
   - name: thread
   - name: total
+
+- kind: VoteSummary
+  properties:
+  - name: thread
+  - name: total
     direction: desc

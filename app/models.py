@@ -335,6 +335,7 @@ class VoteSummary(db.Model):
     role = db.ReferenceProperty(Role, required=True)
     total = db.IntegerProperty(default=0)
     created = db.DateTimeProperty(auto_now_add=True)
+    updated = db.DateTimeProperty(auto_now=True)
 
 
 class BaseActivity(polymodel.PolyModel):
