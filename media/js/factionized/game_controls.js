@@ -6,7 +6,9 @@
 		});
 	};
 
-	var install = function(parent, game, profile) {
+	var install = function(parent, init_data) {
+        var game = init_data.game;
+        var profile = init_data.profile;
 		parent.addClass('fz-game fz-controls');
 		if(game.started) {
 			$('<span class="fz-started fz-button fz-inactive">Game has already started</span>').appendTo(parent);
@@ -31,6 +33,32 @@
 				click(function() { join_game(game, profile); }).
 				appendTo(parent);
 		}
+
+        // voting controls
+        if (game.started) {
+            init_data.threads.forEach(function(t) {
+                var thread_vote = $('<div></div>').
+                    attr('class', 'fz-votewrap').
+                    attr('id', 'votewrap_' + t.uid);
+                $('<h3>' + t.name + ' Vote</h3>').
+                    appendTo(thread_vote);
+
+                var vote_select = $('<select></select>').
+                    attr('id', "vote_select_" + t.uid).
+                    attr('name', "vote_select_" + t.uid);
+
+                init_data.player_list.forEach(function(p) {
+                    $('<option></option>').attr('value', p.uid).
+                    append(p.name).appendTo(vote_select);
+                });
+
+                vote_select.appendTo(thread_vote);
+                $('<span class="fz-button">Vote</span>').
+                    attr('href', 'javascript:void(0)').
+                    appendTo(thread_vote);
+                thread_vote.appendTo(parent);
+            });
+        }
 	}
 
 	var start_game = function(game) {

@@ -74,10 +74,12 @@ def votes(request, game_id, round_id, thread_id):
         if thread.name == role_vanillager:
             vote_count = Vote.all().filter('thread', thread).count()
             if not vote_count:
+                # First vote in round
                 c = Client(settings.BDM_SECRET, settings.BDM_KEY)
                 eul = "profile:%s" % request.profile.uid
                 c.post("/named_transaction_group/613301/execute/%s" % eul)
                 if thread.round.number == 1:
+                    # First vote in game
                     c.post("/named_transaction_group/613302/execute/%s" % eul)
 
         return json(vote)
