@@ -115,13 +115,21 @@ class Game(UIDModel):
             mafia_count = int(floor(mafia_count))
         innocent_count = player_count - (mafia_count + 2) # to include specials
 
-        self.create_role(role_mafia, count=mafia_count)
-        self.create_role(role_doctor)
-        self.create_role(role_sheriff)
-
-        self.create_role(role_vanillager, count=innocent_count)
+        self.convert_bystander(role_mafia, count=mafia_count)
+        self.convert_bystander(role_doctor)
+        self.convert_bystander(role_sheriff)
+        self.convert_bystander(role_vanillager, count=innocent_count)
 
         self.put()
+
+    def convert_bystander(self, to_role, count=1):
+        bystanders = Role.all().filter('name', role_bystander)
+        bystanders = bystanders.filter('game', self).order('created')
+
+        for i in range(count):
+            b = bystanders[i]
+            b.name = to_role
+            b.put()
 
     def create_role(self, name, count=1):
         for i in range(count):
@@ -164,7 +172,7 @@ class Game(UIDModel):
 
     def get_rounds(self):
         return self.round_set.order('-number')
-    
+
     def create_game_threads(self, round):
         # create threads for each of the game threads and 
         # add members to them
@@ -242,12 +250,12 @@ class Game(UIDModel):
                                     roles))
         mafia_count = len(filter(lambda x: x['name'] == role_mafia, roles))
 
-        
 class Role(UIDModel):
     name = db.StringProperty(choices=roles, required=True)
     game = db.ReferenceProperty(Game, required=True)
     player = db.ReferenceProperty(Profile, default=None, required=True)
     is_dead = db.BooleanProperty(default=False, required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
 
     @classmethod
     def get_by_uid(cls, uid):
