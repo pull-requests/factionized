@@ -57,42 +57,106 @@
 	install.thread = function(parent, thread) {
 		api.threads = api.threads || {};
 		thread = api.threads[thread.uid] = { raw: thread };
-		thread.log = $('<div />').addClass('fz-log');
+		thread.log = $('<table />').addClass('fz-log');
 		thread.model = new FZ.Thread(thread.raw,
 									thread.log);
+		var submit = function(content) {
+			thread.model.send($.trim(content))
+			thread.input.val('');
+		};
+		var print = function(messages) {
+			var follow = at_bottom();
+			$.each($.makeArray(messages), function(k,v) {
+				var tab = '&nbsp;&nbsp;';
+				tab = tab + tab + tab + tab;
+				var content = parse(v);
+				content.content = content.content.replace(/\n/g, '<br />').replace(/\t/g, tab);
+				$('<tr />').
+					addClass('fz-message fz-' + v['class'].toLowerCase().replace(/ /g, '-')).
+					append(
+						$('<td class="fz-meta" />').append(
+							$('<span />').addClass('fz-label').append(content.label),
+							$('<span />').addClass('fz-created').append(from_timestamp(v.created))
+						),
+						$('<td class="fz-content" />').append(content.content)
+					).
+					appendTo(thread.log);
+				if(follow) { goto_bottom(); }
+			});
+			if( !follow ) {
+				var count = parseInt(thread.notices.find('fz-count').text(), 10);
+				thread.notices.slideDown(function() {
+					thread.notices.find('fz-count').text((count || 0) + 1);
+				});
+			}
+		};
+		
+		var from_timestamp = function(stamp) {
+			var dat = new Date(stamp * 1000);
+			var mins = dat.getMinutes();
+			if( mins < 10 ) { mins = '0' + mins; }
+			return (dat.getMonth() + '-' + dat.getDate() + '-' + dat.getFullYear() + ' @ ' + dat.getHours() + ':' + mins);
+		};
+
+		var goto_bottom = function() {
+			thread.log[0].scrollTop = thread.log[0].scrollHeight;
+		};
+		var at_bottom = function() {
+			var node = thread.log[0];
+			return (node.scrollHeight - node.scrollTop - $(node).height()) < 50;
+		}
 		parent.append(
 			thread.form = $('<form />').append(
 				thread.log,
+				thread.notices = $('<div />').
+					addClass('.fz-notices').hide().
+					append(
+						'<span class="fz-count"></span>',
+						'<span class="fz-message">Unread Messages</span>'
+					),
 				thread.input = $('<textarea />').
 					attr({ rows: 10, cols: 2 }).
-					addClass('fz-message'),
+					addClass('fz-message').
+					shortcuts({ submit: submit }),
 				thread.button = $('<a />').
 					attr('href', 'javascript:void(0)').
 					addClass('fz-button').
 					append('Send').
 					click(function() {
-						thread.model.send(thread.input.val());
-						thread.input.val('');
-						return false;
+						submit(thread.input.val())
+						e.preventDefault();
 					})
 				)
 			);
-		var print = function(messages) {
-			$.each($.makeArray(messages), function(k,v) {
-				if(typeof(v) == 'string') { v = v; }
-				else if(typeof(v) == 'object' && v.content) { v = v.content; }
-				else { v = undefined; }
-				if(v) {
-					$('<div />').
-						addClass('fz-message').
-						append(v).
-						appendTo(thread.log);
-				}
-			});
-		};
+		thread.log.scroll(function() {
+			if( at_bottom() ) {
+				thread.notices.slideUp('fast', function() {
+					thread.notices.find('.fz-count').text('');
+				});
+			}
+		});
 		thread.model.activities(print);
 		thread.model.onmessage.bind(print);
 		thread.input.wrap('<div class="fz-textarea fz-wrapper"></div>');
+	};
+
+	var parse = function(msg) {
+		return parse[msg['class'].toLowerCase().replace(/ /g, '-')](msg);
+	};
+
+	parse.playerjoin = function(msg) {
+		var id = msg.actor.player.name || msg.actor.player.user.email;
+		return {
+			label: 'Game Notice',
+			content: 'Player ' + id + ' joined the game.'
+		};
+	};
+
+	parse.message = function(msg) {
+		return {
+			label: (msg.actor.player.name || msg.actor.player.user.email),
+			content: msg.content
+		}
 	};
 
 	// Clears out parent html and removes pre-existing data

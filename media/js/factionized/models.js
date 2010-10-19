@@ -7,11 +7,10 @@
 			this.round = thread.round;
 			this.game = thread.round.game;
 			var loc = window.location;
-			this.socket = new io.Socket(document.domain,{
-				resource: this.stream_url()
-			});
-			this.socket.on('message', this.onmessage.trigger);
-			this.socket.connect();
+			//this.socket = new io.Socket(document.domain,{
+			//	resource: this.stream_url()
+			//});
+			//this.socket.on('message', this.onmessage.trigger);
 		},
 		thread_url: function() {
 			return [
@@ -24,11 +23,11 @@
 			return this.thread_url() + '/activities';
 		},
 		send: function(content, callback) {
-			$.post('/' + this.thread_url() + '/messages', { content: content }, $.proxy(function() {
+			$.post('/' + this.thread_url() + '/messages', { content: content }, $.proxy(function(data) {
 				if( $.isFunction(callback) ) {
-					callback(this, content);
+					callback(this, data);
 				}
-				this.onmessage.trigger(content);
+				this.onmessage.trigger(data);
 			}, this));
 		},
 		activities: function(callback) {

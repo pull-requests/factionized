@@ -138,7 +138,7 @@ def stream(request, game_id, round_id, thread_id, timestamp):
     activities = Activity.get_activities(request.user,
                                          thread,
                                          since=dt)
-    if settings.get('DEV', False):
+    if hasattr(settings, 'DEV') and settings.DEV:
         return json(list(activities.run()))
     else:
         return json(long_poll_query(activities))

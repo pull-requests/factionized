@@ -94,6 +94,7 @@ class Game(UIDModel):
     signup_deadline = db.DateTimeProperty(required=True)
     started = db.DateTimeProperty()
     is_complete = db.BooleanProperty(default=False, required=True)
+    signups = db.ListProperty(db.Key)
 
     def get_active_roles(self):
         role_query = self.role_set.filter('name !=', role_bystander)

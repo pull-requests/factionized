@@ -57,8 +57,6 @@ a:visited {
 	text-shadow: white 0px 1px 1px;
 }
 
-.fz-button.fz-inactive;
-
 .fz-thread form textarea,
 .fz-thread form .bd-button,
 .fz-thread form, .fz-thread .fz-log {
@@ -67,6 +65,23 @@ a:visited {
 
 .fz-thread .fz-log {
 	height: 300px;
+	overflow: auto;
+	padding: 5px;
+	margin: 0px;
+}
+
+.fz-log td {
+	padding: 5px 10px 5px 5px;
+}
+
+.fz-log .fz-label {
+	font-size: 12px;
+}
+
+.fz-log .fz-created {
+	display: block;
+	font-size: 10px;
+	color: #666;
 }
 
 .fz-thread form .bd-button,
@@ -75,15 +90,22 @@ a:visited {
 	border: 1px solid #000;
 }
 
+.fz-thread form textarea,
+.fz-thread .fz-log {
+	font-size: 14px;
+	letter-spacing: 1px;
+	font-family: Verdana;
+}
 
 .fz-thread form textarea {
 	width: 100%;
 	border: 0px;
+	height: 75px;
 }
 
 .fz-textarea.fz-wrapper {
 	margin:5px 0;
-	padding: 0px 7px 0px 1px;
+	padding: 3px 9px 3px 4px;
 }
 
 .fz-game.fz-controls .fz-button {
