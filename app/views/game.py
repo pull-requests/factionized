@@ -91,3 +91,4 @@ def start(request, game_id):
                               kwargs={'game_id':game.uid,
                                       'round_id':latest_round.uid}),
                   countdown=latest_round.length())
+    return HttpResponse('Game Started', status=200)
