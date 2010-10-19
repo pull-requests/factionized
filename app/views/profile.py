@@ -18,6 +18,8 @@ from app.lib.fb import FacebookUser
 
 #from bigdoorkit.resources.user import EndUser
 
+from bigdoorkit import Client
+
 @login_required
 def index(request, profile_id=None):
     return render('profile/index.html')
@@ -27,7 +29,14 @@ def index(request, profile_id=None):
 def show(request, profile_id):
     profile = Profile.all().filter('uid =', profile_id).get()
     #bd_end_user = EndUser(end_user_login=profile.uid)
-    bd_end_user = return_fake_end_user(profile)
+
+    eul = "profile:%s" % profile.uid
+    c = Client(settings.BDM_SECRET, settings.BDM_KEY)
+    try:
+        bd_end_user = c.get('end_user/%s' % eul)
+    except ValueError, e:
+        payload = dict(end_user_login=eul)
+        bd_end_user = c.post('end_user', payload=payload)
 
     if profile.uid == request.profile.uid:
         is_editable = True

@@ -339,6 +339,20 @@ class VoteSummary(db.Model):
 
 
 class BaseActivity(polymodel.PolyModel):
+    def __init__(self, *args, **kw):
+        if not 'key_name' in kw and not '_from_entity' in kw:
+            kw['key_name'] = new_uid()
+
+        super(BaseActivity, self).__init__(*args, **kw)
+
+        if not '_from_entity' in kw:
+            self.uid = kw['key_name']
+
+    uid = db.StringProperty()
+
+    @classmethod
+    def get_by_uid(cls, uid):
+        return cls.get_by_key_name(uid)
     created = db.DateTimeProperty(auto_now_add=True,
                                   required=True)
     thread = db.ReferenceProperty(Thread, required=True)
@@ -351,7 +365,7 @@ class BaseActivity(polymodel.PolyModel):
         acts = cls.all().filter('thread', thread)
 
         if since:
-            acts.filter('created >', since)
+            acts.filter('created >', since.created)
 
         return acts.order('created')
 

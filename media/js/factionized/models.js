@@ -23,8 +23,9 @@
 			return this.thread_url() + '/activities';
 		},
 		listen: function() {
+			console.log(this.last)
 			this.stream.
-				from(new Date(this.last.created * 1000)).
+				from(this.last.uid).
 				start();
 		},
 		unlisten: function() {
@@ -35,7 +36,6 @@
 				if( $.isFunction(callback) ) {
 					callback(this, data);
 				}
-				this.onmessage.trigger.call(this, data);
 			}, this));
 		},
 		activities: function(callback) {
