@@ -13,6 +13,8 @@ from app.models import (Round, VoteSummary, Save, DeathByVote, Reveal,
                         role_bystander, role_vanillager, 
                         role_sheriff, role_doctor, role_mafia, roles)
 
+from django.http import HttpResponse
+
 import random
 
 def get_thread_highest_vote(thread):
@@ -22,7 +24,7 @@ def get_thread_highest_vote(thread):
     """
 
     vote_summary = thread.votesummary_set.order('-total')
-    results = filter(lambda x: x.count == vote_summary[0].count,
+    results = filter(lambda x: x.total == vote_summary[0].total,
                      vote_summary)
     random.shuffle(results)
     if len(results):
@@ -103,10 +105,10 @@ def end_round(request, game_id, round_id):
                         vote_thread=village_thread,
                         thread=village_thread)
 
-    doctor_saves = [x.role for x in filter(lambda x: x.count, 
+    doctor_saves = [x.role for x in filter(lambda x: x.total, 
                                            doctor_thread.votesummary_set) \
                     if x.total]
-    sheriff_reveals = [x.role for x in filter(lambda x: x.count,
+    sheriff_reveals = [x.role for x in filter(lambda x: x.total,
                                               sheriff_thread.votesummary_set) \
                        if x.total]
 
@@ -170,21 +172,25 @@ def end_round(request, game_id, round_id):
         death.put()
     
     if not game.is_over():
-        logging.debug('game:%s round:%s starting next round')
+        logging.debug('game:%s round:%s starting next round' % \
+                      (game.uid, round.uid))
         r = game.start_next_round()
         logging.debug('game:%s started new round:%s' % (game.uid, r.uid))
         assert r.number == round.number + 1 # sanity check
-        taskqueue.add(url=reverse('round_end', kwargs={'game_id':game.uid,
+        taskqueue.add(url=reverse('end_round', kwargs={'game_id':game.uid,
                                                         'round_id':r.uid}),
                       method='POST',
                       countdown=r.length())
     else:
-        logging.debug('game:%s round:%s has hit the end game condition')
-        taskqueue.add(url=reverse('game_end', kwargs={'game_id':game.uid}),
+        logging.debug('game:%s round:%s has hit the end game condition' %  \
+                      (game.uid, round.uid))
+        taskqueue.add(url=reverse('end_game', kwargs={'game_id':game.uid}),
                       method='POST')
 
     logging.debug('game:%s round:%s end round total_time:%s' % \
                   (game.uid, round.uid, (datetime.now() - t).seconds))
+
+    return HttpResponse('ok', status=200)
                  
 def end_game(request, game_id):
    
@@ -213,5 +219,7 @@ def end_game(request, game_id):
     
     game.is_complete = True
     game.put()
+
+    return HttpResponse('ok', status=200)
     
 

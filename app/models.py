@@ -268,6 +268,12 @@ class Role(UIDModel):
         except IndexError, e:
             return None
 
+    def get_side(self):
+        if self.name in [role_vanillager, role_doctor, role_sheriff]:
+            return role_vanillager
+        else: 
+            return role_mafia
+
     def kill(self, killed_by_role, round_number):
         self.is_dead = True
         self.put()
@@ -275,8 +281,8 @@ class Role(UIDModel):
         # TODO: these should be moved to tasks
         # at this point, we don't care if the response is good or not.
         c = Client(settings.BDM_SECRET, settings.BDM_KEY)
-
-        txn_id = kill_txn_ids[self.name][killed_by_role]
+        
+        txn_id = kill_txn_ids[self.get_side()][killed_by_role]
         eul = "profile:%s" % self.player.uid
 
         endpoint = "named_transaction_group/%d/execute/%s"
@@ -302,7 +308,7 @@ class Round(UIDModel):
         return self.thread_set.filter('name', name).get()
 
     def length(self):
-        return 60*60*5 # five minutes
+        return 60 # minute
 
 
 class Thread(UIDModel):
@@ -328,6 +334,8 @@ class VoteSummary(db.Model):
     thread = db.ReferenceProperty(Thread, required=True)
     role = db.ReferenceProperty(Role, required=True)
     total = db.IntegerProperty(default=0)
+    created = db.DateTimeProperty(auto_now_add=True)
+    updated = db.DateTimeProperty(auto_now=True)
 
 
 class BaseActivity(polymodel.PolyModel):
@@ -392,24 +400,24 @@ class Vote(Activity):
         s = VoteSummary.all().filter("role", self.target)
         s = s.filter("thread", self.thread)
         try:
-            s = s.order("-created")[0]
+            s = s.order("-created").fetch(1)[0]
         except IndexError, e:
             s = VoteSummary(role=self.target,
                             thread=self.thread,
                             total=0)
-        s.total += 1
+        s.total = s.total + 1
         s.put()
 
     def decrement(self):
         s = VoteSummary.all().filter("role", self.target)
         s = s.filter("thread", self.thread)
         try:
-            s = s.order("-created")[0]
+            s = s.order("-created").fetch(1)[0]
         except IndexError, e:
             s = VoteSummary(role=self.target,
                             thread=self.thread,
                             total=0)
-        s.total -= 1
+        s.total = s.total - 1
         s.put()
 
 

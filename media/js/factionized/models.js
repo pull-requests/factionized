@@ -11,6 +11,7 @@
 				resource: this.stream_url()
 			});
 			this.socket.on('message', this.onmessage.trigger);
+			this.socket.connect();
 		},
 		thread_url: function() {
 			return [
