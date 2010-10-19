@@ -343,7 +343,7 @@ class BaseActivity(polymodel.PolyModel):
         if not 'key_name' in kw and not '_from_entity' in kw:
             kw['key_name'] = new_uid()
 
-        super(UIDModel, self).__init__(*args, **kw)
+        super(BaseActivity, self).__init__(*args, **kw)
 
         if not '_from_entity' in kw:
             self.uid = kw['key_name']
@@ -365,7 +365,7 @@ class BaseActivity(polymodel.PolyModel):
         acts = cls.all().filter('thread', thread)
 
         if since:
-            acts.filter('created >', since)
+            acts.filter('created >', since.created)
 
         return acts.order('created')
 

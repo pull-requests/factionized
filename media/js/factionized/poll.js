@@ -12,7 +12,7 @@
 	}
 
 	var poller = function(config) {
-		this.config = config || {};
+		this.config = $.extend({ id_field: 'uid' }, config || {});
 		var evt = new _event();
 		this.bind = function(cb) {
 			evt.bind('received', cb);
@@ -24,7 +24,6 @@
 			evt.trigger('received', data);
 		};
 		this.stopped = true;
-		this.from();
 	}
 
 	poller.prototype = {
@@ -37,8 +36,8 @@
 		stop: function() {
 			this.stopped = true;
 		},
-		from: function(dat) {
-			this.since = (dat || new Date());
+		from: function(since) {
+			this.since = since;
 			return this;
 		},
 		tick: function() {
@@ -49,11 +48,11 @@
 		get: function() {
 			if( this.locked ) { return; }
 			this.locked = true;
-			$.get(this.config.path + '/xhr-polling/' + this.since.valueOf(), $.proxy(function(data) {
+			$.get(this.config.path + '/xhr-polling/' + this.since, $.proxy(function(data) {
 				data = $.makeArray(data);
 				var dat = data[data.length-1];
-				if( dat && dat.created ) {
-					this.since = new Date(dat.created * 1000);
+				if( dat && dat[this.config.id_field] ) {
+					this.since = dat[this.config.id_field];
 				}
 				this.locked = false;
 				this.trigger(data);

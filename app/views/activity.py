@@ -174,9 +174,9 @@ def long_poll_query(query):
             return list(query.run())
         time.sleep(500)
 
-def stream(request, game_id, round_id, thread_id, timestamp):
+def stream(request, game_id, round_id, thread_id, message_id):
     thread = Thread.get_by_uid(thread_id)
-    dt = datetime.utcfromtimestamp(float(timestamp)/1000)
+    since = Activity.get_by_uid(message_id)
 
     if thread is None:
         raise Http404
@@ -189,5 +189,5 @@ def stream(request, game_id, round_id, thread_id, timestamp):
 
     activities = Activity.get_activities(request.user,
                                          thread,
-                                         since=dt)
+                                         since=since)
     return json(list(activities.run()))
