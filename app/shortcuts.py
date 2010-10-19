@@ -1,7 +1,8 @@
 try:
     import json as json_mod
 except:
-    import simplejson as json_mod
+    #import simplejson as json_mod
+    from django.utils import simplejson as json_mod
 
 import time
 from datetime import datetime
