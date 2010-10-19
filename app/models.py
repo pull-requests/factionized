@@ -120,7 +120,7 @@ class Game(UIDModel):
         self.create_role(role_sheriff)
 
         self.create_role(role_vanillager, count=innocent_count)
-        
+
         self.put()
 
     def create_role(self, name, count=1):
@@ -217,7 +217,7 @@ class Game(UIDModel):
 
         self.create_roles()
         round = self.start_next_round()
-        
+
         gs = GameStart(thread=round.get_thread(role_vanillager))
         gs.put()
 
