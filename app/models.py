@@ -311,7 +311,7 @@ class Round(UIDModel):
         return self.thread_set.filter('name', name).get()
 
     def length(self):
-        return 60 # minute
+        return 60 * 10
 
 
 class Thread(UIDModel):
