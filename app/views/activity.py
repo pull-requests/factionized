@@ -3,10 +3,12 @@ from datetime import datetime
 
 from django.http import Http404, HttpResponse
 from django.conf import settings
+from google.appengine.runtime import DeadlineExceededError
 from app.models import (Activity, Message, Vote, Thread, Role, Game,
                         Profile, VoteSummary, role_vanillager)
 from app.shortcuts import json
 from bigdoorkit import Client
+from urllib import urlencode
 
 def activities(request, game_id, round_id, thread_id):
     thread = Thread.get_by_uid(thread_id)
@@ -90,6 +92,7 @@ def votes(request, game_id, round_id, thread_id):
 
 def vote_summary(request, game_id, round_id, thread_id):
     thread = Thread.get_by_uid(thread_id)
+    game = Game.get_by_uid(game_id)
     if thread is None:
         raise Http404
 
@@ -103,12 +106,32 @@ def vote_summary(request, game_id, round_id, thread_id):
     summaries = VoteSummary.all().filter('thread', thread)
     summaries = summaries.order('-total')
     data = []
+    total_votes = 0
     for s in summaries:
         data.append(dict(profile=s.role.player,
                          total=s.total,
                          updated=s.updated))
+        total_votes += s.total
 
-    return json(dict(thread=thread, summaries=data))
+    chart_data = dict(chxr="0,0,%s" % len(data),
+                      chxt='y',
+                      chbh='a',
+                      chs='200x200',
+                      cht='bhs',
+                      chco='4D89F9',
+                      chds="0,%s" % total_votes)
+
+    player_labels = [s['profile'].name for s in data]
+    player_labels.reverse()
+    chart_data['chx1'] = "0:|%s" % "|".join(player_labels)
+    chart_data['chd'] = "t:%s" % ",".join([str(s['total']) for s in data])
+
+    chart_url = "http://chart.apis.google.com/chart?%s"
+    chart_url = chart_url % urlencode(chart_data)
+
+    return json(dict(thread=thread,
+                     summaries=data,
+                     chart_url=chart_url))
 
 
 def messages(request, game_id, round_id, thread_id):
@@ -155,8 +178,6 @@ def stream(request, game_id, round_id, thread_id, timestamp):
     thread = Thread.get_by_uid(thread_id)
     dt = datetime.utcfromtimestamp(float(timestamp)/1000)
 
-    print dt
-
     if thread is None:
         raise Http404
 
@@ -169,7 +190,4 @@ def stream(request, game_id, round_id, thread_id, timestamp):
     activities = Activity.get_activities(request.user,
                                          thread,
                                          since=dt)
-    if hasattr(settings, 'DEV') and settings.DEV:
-        return json(list(activities.run()))
-    else:
-        return json(long_poll_query(activities))
+    return json(list(activities.run()))

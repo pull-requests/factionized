@@ -7,11 +7,10 @@
 			this.round = thread.round;
 			this.game = thread.round.game;
 			var loc = window.location;
-			this.socket = new io.Socket(document.domain,{
-				resource: this.stream_url()
-			});
-			this.socket.on('message', this.onmessage.trigger);
-			this.socket.connect();
+			this.stream = FZ.poll('/' + this.stream_url());
+			this.stream.bind($.proxy(function(data) {
+				this.onmessage.trigger.call(this, data);
+			}, this));
 		},
 		thread_url: function() {
 			return [
@@ -23,20 +22,29 @@
 		stream_url: function() {
 			return this.thread_url() + '/activities';
 		},
+		listen: function() {
+			this.stream.
+				from(new Date(this.last.created * 1000)).
+				start();
+		},
+		unlisten: function() {
+			this.stream.stop();
+		},
 		send: function(content, callback) {
 			$.post('/' + this.thread_url() + '/messages', { content: content }, $.proxy(function(data) {
 				if( $.isFunction(callback) ) {
 					callback(this, data);
 				}
-				this.onmessage.trigger(data);
+				this.onmessage.trigger.call(this, data);
 			}, this));
 		},
 		activities: function(callback) {
-			$.get('/' + this.thread_url() + '/activities', function(data) {
+			$.get('/' + this.thread_url() + '/activities', $.proxy(function(data) {
+				this.update_last(data);
 				if( $.isFunction(callback) ) {
 					callback(data);
 				}
-			});
+			}, this));
 		},
 		onmessage: (function() {
 			var evt = {};
@@ -49,10 +57,19 @@
 				evt.unbind('received', cb);
 			}
 			api.trigger = function(msg) {
+				this.update_last(msg);
 				evt.trigger('received', msg);
 			}
 			return api;
-		})()
+		})(),
+		update_last: function(data) {
+			data = $.makeArray(data);
+			var dat = data[data.length-1];
+			if( dat ) {
+				this.last = dat;
+			}
+			return this;
+		}
 	});
 
 })( jQuery, Backbone, FZ );

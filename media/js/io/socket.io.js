@@ -639,7 +639,9 @@ if (typeof window != 'undefined'){
 				}
 			};
 		}
-		this._xhr.send();
+		setTimeout(function() {
+			if(self._xhr) { self._xhr.send(); }
+		}, 1000);
 	};
 
 	XHRPolling.check = function(){
@@ -651,6 +653,7 @@ if (typeof window != 'undefined'){
 	};
 
 })();
+
 /**
  * Socket.IO client
  * 
