@@ -33,10 +33,10 @@ def show(request, profile_id):
     eul = "profile:%s" % profile.uid
     c = Client(settings.BDM_SECRET, settings.BDM_KEY)
     try:
-        bd_end_user = c.get('end_user/%s' % eul)
+        bd_end_user = c.get('end_user/%s' % eul)[0]
     except ValueError, e:
         payload = dict(end_user_login=eul)
-        bd_end_user = c.post('end_user', payload=payload)
+        bd_end_user = c.post('end_user', payload=payload)[0]
 
     if profile.uid == request.profile.uid:
         is_editable = True
