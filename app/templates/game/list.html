@@ -6,7 +6,6 @@
         <div class="tinywrapper">
             <form method="POST" action="/games">
                 <h3>Create a new game</h3>
-                {% csrf_token %}
                 <label for="name">Name:</label>
                 <input type="text" name="name" id="name" />
                 <input type="submit" value="Create" />
