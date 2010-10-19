@@ -1,11 +1,10 @@
-import logging
 import time
 from datetime import datetime
 
 from django.http import Http404, HttpResponse
 from django.conf import settings
 from app.models import (Activity, Message, Vote, Thread, Role, Game,
-                        role_vanillager)
+                        Profile, role_vanillager)
 from app.shortcuts import json
 from bigdoorkit import Client
 
@@ -26,6 +25,7 @@ def activities(request, game_id, round_id, thread_id):
 
 def votes(request, game_id, round_id, thread_id):
     thread = Thread.get_by_uid(thread_id)
+    game = Game.get_by_uid(game_id)
     if thread is None:
         raise Http404
 
@@ -45,7 +45,11 @@ def votes(request, game_id, round_id, thread_id):
         if target_id is None:
             raise Exception('No target')
 
-        target = Role.get_by_uid(target_id)
+        target_profile = Profile.get_by_uid(target_id)
+        target = Role.all().filter('player', target_profile)
+        target = target.filter('game', game)
+        target = target.fetch(1)[0]
+
         # find the last vote this user made (if any)
         game = Game.get_by_uid(game_id)
         actor = Role.get_by_profile(game, request.profile)
