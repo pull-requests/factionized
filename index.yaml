@@ -33,6 +33,12 @@ indexes:
   - name: game
   - name: name
 
+- kind: Role
+  properties:
+  - name: game
+  - name: name
+  - name: created
+
 - kind: Round
   properties:
   - name: game
