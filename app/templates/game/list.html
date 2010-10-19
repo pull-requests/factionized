@@ -22,13 +22,20 @@
                     <li{% if forloop.first %} class="first"{% endif %}>
                         <a href="/games/{{game.uid}}">
                             <span class="game-name">{{game.name}}</span>
-                            <span class="game-status">
-                                {% ifequal game.get_current_round.number 0 %}
-                                    Game not started
-                                {% else %}
-                                Round: {{ game.get_current_round.number|apnumber }}
-                                {% endifequal %}
-                            </span>
+                            <div class="game-description">
+                                Started by {{ game.game_starter.user.nickname }}
+                                <span class="game-status">
+                                    {% ifequal game.get_current_round.number 0 %}
+                                    Game not started ({{ game.signups|length }} players)
+                                    {% else %}
+                                        {% if game.is_over %}
+                                            Game finished
+                                        {% else %}
+                                            Round: {{ game.get_current_round.number|apnumber }}
+                                        {% endif %}
+                                    {% endifequal %}
+                                </span>
+                            </div>
                         </a>
                     </li>
                     {% endfor %}  
