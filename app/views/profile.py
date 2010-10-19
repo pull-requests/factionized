@@ -114,11 +114,10 @@ def service_feed(request, service_name):
             return HttpResponse(status=400)
 
         if service_name == 'facebook':
-            link = 'http://www.factionized.com'
 
             fb_user = FacebookUser(profile)
             fb_user.post_to_feed(message,image_url,caption)
-            params = {'message':message,'image':image_url,'link':link,'caption':caption}
+            params = {'message':message,'image':image_url,'caption':caption}
             return render('profile/post.html', {'params':params})
 
         elif service_name == 'twitter':
