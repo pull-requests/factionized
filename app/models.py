@@ -7,7 +7,7 @@ from app.exc import FactionizeError, NoAvailableGameSlotsError
 
 from datetime import datetime
 from math import ceil, floor
-from random import random
+from random import random, shuffle
 
 from django.conf import settings
 from bigdoorkit import Client
@@ -92,7 +92,6 @@ class Game(UIDModel):
     mafia_ratio = db.FloatProperty(default=0.33)
     modified_date = db.DateTimeProperty(auto_now=True)
     signup_deadline = db.DateTimeProperty(required=True)
-    signups = db.ListProperty(db.Key)
     started = db.DateTimeProperty()
     is_complete = db.BooleanProperty(default=False, required=True)
 
@@ -115,21 +114,23 @@ class Game(UIDModel):
             mafia_count = int(floor(mafia_count))
         innocent_count = player_count - (mafia_count + 2) # to include specials
 
-        self.convert_bystander(role_mafia, count=mafia_count)
-        self.convert_bystander(role_doctor)
-        self.convert_bystander(role_sheriff)
-        self.convert_bystander(role_vanillager, count=innocent_count)
+        available_roles = [role_mafia for i in range(mafia_count)]
+        available_roles.append(role_doctor)
+        available_roles.append(role_sheriff)
+        available_roles += [role_vanillager for i in range(mafia_count)]
+        shuffle(available_roles)
+
+        for rolename in available_roles:
+            self.convert_next_bystander(rolename)
 
         self.put()
 
-    def convert_bystander(self, to_role, count=1):
+    def convert_next_bystander(self, to_role):
         bystanders = Role.all().filter('name', role_bystander)
         bystanders = bystanders.filter('game', self).order('created')
-
-        for i in range(count):
-            b = bystanders[i]
-            b.name = to_role
-            b.put()
+        b = bystanders.fetch(1)[0]
+        b.name = to_role
+        b.put()
 
     def create_role(self, name, count=1):
         for i in range(count):
