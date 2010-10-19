@@ -55,6 +55,13 @@ indexes:
 
 - kind: VoteSummary
   properties:
+  - name: role
+  - name: thread
+  - name: created
+    direction: desc
+
+- kind: VoteSummary
+  properties:
   - name: thread
   - name: total
     direction: desc
