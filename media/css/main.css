@@ -128,15 +128,44 @@ a:visited {
 	display: block;
 }
 
+#fz-level{
+    margin-bottom:10px;
+    display:inline-block;
+    margin:0 12px 12px;
+    width:208px;
+}
+#fz-level .levelwrapper{
+    padding:3px;
+    border:1px solid #D3D3D3;
+    -moz-border-radius:3px;
+    -webket-border-radius:3px;
+}
+#fz-level #fz-level-label{
+    text-align:center;
+    font-weight:bold;
+    width:100%;
+}
+#fz-level #fz-level-description{
+    font-size:11px;
+    line-height:9px;
+    border-top:1px solid #D3D3D3;
+    padding:6px 4px;
+    height:25px;
+}
+
+
 .pane{
 	margin-bottom:10px;
 	padding:3px 0;
 }
 .pane h1{
-	3px 0px;
+	padding:3px 0px;
 }
 
-
+.subhead{
+    margin-top:-25px;
+    margin-bottom:20px;
+}
 
 
 
@@ -239,6 +268,10 @@ a:visited {
     border:1px solid #CCC9B9;
 }
 
+#viewport{
+    min-height:300px;
+    width:100%;
+}
 #viewport-controls{
     margin-top:26px;
 }
