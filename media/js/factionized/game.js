@@ -133,8 +133,7 @@
 		thread.model.activities(function(msgs) {
 			print(msgs);
 			thread.model.onmessage.bind(print);
-			thread.model.stream.from(new Date(1000 * thread.model.last.created));
-			thread.model.stream.start();
+			thread.model.listen()
 		});
 		thread.input.wrap('<div class="fz-textarea fz-wrapper"></div>');
 	};
@@ -151,12 +150,45 @@
 		};
 	};
 
+	parse.save = function(msg) {
+		return {
+			label: (msg.actor.player.name || msg.actor.player.user.email),
+			content: (msg.target.player.name || 
+						msg.targe.player.user.email) + 
+						' was saved by the doctor!'
+		}
+	};
+	parse.reveal = function(msg) {
+		return {
+			label: (msg.actor.player.name || msg.actor.player.user.email),
+			content: (msg.target.player.name || msg.target.player.user.email) + 
+				' was revealed to be a ' + msg.target.name
+		}
+	};
+
 	parse.message = function(msg) {
 		return {
 			label: (msg.actor.player.name || msg.actor.player.user.email),
 			content: msg.content
 		}
 	};
+
+	parse.deathbyvote = function(msg) {
+		return {
+			label: 'Game Notice',
+			content: (msg.actor.player.name || msg.actor.player.user.email) +
+				' was killed by ' + 
+				(msg.vote_thread.name === 'Vanillager' ? 'vote' : 'mafia')
+		}
+	};
+
+	parse.vote = function(msg) {
+		return {
+			label: (msg.actor.player.name || msg.actor.player.user.email),
+			content: '!vote for ' + 
+				(msg.target.player.name || msg.actor.player.user.email)
+		}
+	}
 
 	// Clears out parent html and removes pre-existing data
 	var destroy = function() {
