@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.http import Http404, HttpResponse
 from django.conf import settings
+from google.appengine.runtime import DeadlineExceededError
 from app.models import (Activity, Message, Vote, Thread, Role, Game,
                         Profile, VoteSummary, role_vanillager)
 from app.shortcuts import json
@@ -155,8 +156,6 @@ def stream(request, game_id, round_id, thread_id, timestamp):
     thread = Thread.get_by_uid(thread_id)
     dt = datetime.utcfromtimestamp(float(timestamp)/1000)
 
-    print dt
-
     if thread is None:
         raise Http404
 
@@ -169,7 +168,4 @@ def stream(request, game_id, round_id, thread_id, timestamp):
     activities = Activity.get_activities(request.user,
                                          thread,
                                          since=dt)
-    if hasattr(settings, 'DEV') and settings.DEV:
-        return json(list(activities.run()))
-    else:
-        return json(long_poll_query(activities))
+    return json(list(activities.run()))
