@@ -20,6 +20,6 @@
 	<script type="text/javascript">
 		var init_data = {{ serialized|safe }}
 		$('#viewport').game(init_data);
-		$('#viewport-controls').game_controls(init_data.game, init_data.profile);
+		$('#viewport-controls').game_controls(init_data);
 	</script>
 {% endblock %}
