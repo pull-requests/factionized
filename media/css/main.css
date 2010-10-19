@@ -189,12 +189,10 @@ a:visited {
 	clear:both;
 }
 #header a{
-	/*color:#40FC1C;*/
-    color:#2DB013;
+    color:#FFFFFF;
 }
 #header a:hover{
-	/*color:#2DB013;*/
-    color:#40FC1C;
+    color:#008CD2;
 }
 #header a#masthead{
 	font-size:30px;
@@ -241,7 +239,7 @@ a:visited {
 }
 #games-list ul li{
     font-size:15px;
-    margin:0 0 3px;
+    margin:0x;
     padding:0 7px;
     border-bottom:1px solid #CCC9B9;
 }
