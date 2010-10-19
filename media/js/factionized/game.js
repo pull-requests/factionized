@@ -77,12 +77,21 @@
 					})
 				)
 			);
-		thread.model.onmessage.bind(function(message) {
-			$('<div />').
-				addClass('fz-message').
-				append(message).
-				appendTo(thread.log);
-		});
+		var print = function(messages) {
+			$.each($.makeArray(messages), function(k,v) {
+				if(typeof(v) == 'string') { v = v; }
+				else if(typeof(v) == 'object' && v.content) { v = v.content; }
+				else { v = undefined; }
+				if(v) {
+					$('<div />').
+						addClass('fz-message').
+						append(v).
+						appendTo(thread.log);
+				}
+			});
+		};
+		thread.model.activities(print);
+		thread.model.onmessage.bind(print);
 		thread.input.wrap('<div class="fz-textarea fz-wrapper"></div>');
 	};
 
