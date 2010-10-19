@@ -3,7 +3,6 @@ html, body, #wrapper{
 	height:100%;
 }
 body{
-	font-family:Arial,Helvetica,sans-serif;
 }
 body > #wrapper{
 	height:auto;
@@ -56,8 +55,9 @@ a:visited {
 
 .fz-button {
 	margin: 2px 0px;
-	background: #EEE -webkit-gradient(linear, 0 0, 0 100%, from(white), to(#DDD));
-	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(white), to(#DDD));
+	/*background: #EEE -webkit-gradient(linear, 0 0, 0 100%, from(white), to(#DDD));
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(white), to(#DDD));*/
+    background-color:#FFFFFF;
 	border-color: #BBB #999 #999 #BBB;
 	border-bottom-left-radius: 2px 2px;
 	border-bottom-right-radius: 2px 2px;
@@ -65,11 +65,11 @@ a:visited {
 	border-width: 1px;
 	border-top-left-radius: 2px 2px;
 	border-top-right-radius: 2px 2px;
-	color: black;
-	cursor: pointer;
+	/*color: black;*/
+	/*cursor: pointer;*/
 	display: inline-block;
 	font: normal normal normal 13px/13px Arial, sans-serif;
-	margin: 0px;
+	margin: 0 0 3px 0;
 	padding: 4px 8px 5px;
 	text-decoration: none;
 	text-shadow: white 0px 1px 1px;
@@ -78,6 +78,7 @@ a:visited {
 .canvas{
 	overflow:hidden;
 	padding-bottom:35px;/*for flush to footer use 23px*/
+    background-color:#FFFFFF;
 }
 .fz-button.fz-inactive;
 
@@ -87,7 +88,16 @@ a:visited {
 	display: block;
 }
 
-
+.fz-label{
+    display:inline-block;
+    -moz-border-radius:3px 3px 0 0;
+    -webkit-border-radius:3px 3px 0 0;
+    padding:3px 10px;
+    background-color:#000000;
+    line-height:20px;
+    font-weight:bold;
+    font-size:15px;
+}
 
 
 
@@ -100,7 +110,7 @@ a:visited {
 .fz-thread form .bd-button,
 .fz-thread .fz-log,
 .fz-textarea.fz-wrapper {
-	border: 1px solid #000;
+	border: 1px solid #CCC9B9;
 }
 
 
@@ -134,7 +144,6 @@ a:visited {
 	background-color:#2b2a25;
 	color:#CBC4C2;
 	width:100%;
-	font: 13px/1.5 Helvetica,Arial,'Liberation Sans',FreeSans,sans-serif;
 }
 #header{
 	border-bottom:3px solid #403f3a;
@@ -191,8 +200,6 @@ a:visited {
 
 .tinywrapper{
     padding:10px;
-}
-.tinwrapper{
     -moz-border-radius:5px;
     -webkit-border-radious5px;
 }
@@ -228,5 +235,10 @@ a:visited {
     margin-bottom:5px;
 }
 .sidebar .tinywrapper{
-    background-color:#cfcdc0;
+    background-color:#F2F2F2;
+    border:1px solid #CCC9B9;
+}
+
+#viewport-controls{
+    margin-top:26px;
 }
