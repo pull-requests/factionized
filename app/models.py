@@ -9,6 +9,9 @@ from datetime import datetime
 from math import ceil, floor
 from random import random
 
+from django.conf import settings
+from bigdoorkit import Client
+
 role_vanillager = 'Vanillager'
 role_doctor = 'Doctor'
 role_sheriff = 'Sheriff'
@@ -27,6 +30,12 @@ threads = [role_vanillager, role_doctor, role_sheriff, role_mafia,
            role_bystander, thread_pregame, thread_ghosts]
 public_threads = [thread_pregame, role_vanillager, role_bystander]
 
+# Target is the first dict, killer is the second.
+kill_txn_ids = {role_vanillager: {role_vanillager: 613293,
+                                  role_mafia: 613294},
+                role_mafia: {role_vanillager: 613295,
+                             role_mafia: 613296},
+               }
 
 def member_selector(game, alive=True, role=None):
     q = game.role_set
@@ -230,9 +239,25 @@ class Role(UIDModel):
         except IndexError, e:
             return None
 
-    def kill(self):
+    def kill(self, killed_by_role, round):
         self.is_dead = True
         self.put()
+
+        # TODO: these should be moved to tasks
+        # at this point, we don't care if the response is good or not.
+        c = Client(settings.BDM_SECRET, settings.BDM_KEY)
+
+        txn_id = kill_txn_ids[self.name][killed_by_role]
+        eul = "profile:%s" % self.player.uid
+
+        endpoint = "named_transaction_group/%d/execute/%s"
+        endpoint = endpoint % (txn_id, eul)
+        resp = c.post(endpoint)
+
+        if round == 1 and killed_by_role == role_vanillager:
+            # Bandwagoned. <Nelson>Ha ha!</Nelson>
+            endpoint = "named_transaction_group/613292/execute/%s" % eul
+            resp = c.post(endpoint)
 
 
 class Round(UIDModel):
