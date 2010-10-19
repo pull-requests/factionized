@@ -170,17 +170,19 @@ def end_round(request, game_id, round_id):
         death.put()
     
     if not game.is_over():
-        logging.debug('game:%s round:%s starting next round')
+        logging.debug('game:%s round:%s starting next round' % \
+                      (game.uid, round.uid))
         r = game.start_next_round()
         logging.debug('game:%s started new round:%s' % (game.uid, r.uid))
         assert r.number == round.number + 1 # sanity check
-        taskqueue.add(url=reverse('round_end', kwargs={'game_id':game.uid,
+        taskqueue.add(url=reverse('end_round', kwargs={'game_id':game.uid,
                                                         'round_id':r.uid}),
                       method='POST',
                       countdown=r.length())
     else:
-        logging.debug('game:%s round:%s has hit the end game condition')
-        taskqueue.add(url=reverse('game_end', kwargs={'game_id':game.uid}),
+        logging.debug('game:%s round:%s has hit the end game condition' %  \
+                      (game.uid, round.uid))
+        taskqueue.add(url=reverse('end_game', kwargs={'game_id':game.uid}),
                       method='POST')
 
     logging.debug('game:%s round:%s end round total_time:%s' % \
