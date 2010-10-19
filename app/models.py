@@ -7,7 +7,7 @@ from app.exc import FactionizeError, NoAvailableGameSlotsError
 
 from datetime import datetime
 from math import ceil, floor
-from random import random
+from random import random, shuffle
 
 from django.conf import settings
 from bigdoorkit import Client
@@ -92,7 +92,6 @@ class Game(UIDModel):
     mafia_ratio = db.FloatProperty(default=0.33)
     modified_date = db.DateTimeProperty(auto_now=True)
     signup_deadline = db.DateTimeProperty(required=True)
-    signups = db.ListProperty(db.Key)
     started = db.DateTimeProperty()
     is_complete = db.BooleanProperty(default=False, required=True)
 
@@ -115,13 +114,23 @@ class Game(UIDModel):
             mafia_count = int(floor(mafia_count))
         innocent_count = player_count - (mafia_count + 2) # to include specials
 
-        self.create_role(role_mafia, count=mafia_count)
-        self.create_role(role_doctor)
-        self.create_role(role_sheriff)
+        available_roles = [role_mafia for i in range(mafia_count)]
+        available_roles.append(role_doctor)
+        available_roles.append(role_sheriff)
+        available_roles += [role_vanillager for i in range(mafia_count)]
+        shuffle(available_roles)
 
-        self.create_role(role_vanillager, count=innocent_count)
-        
+        for rolename in available_roles:
+            self.convert_next_bystander(rolename)
+
         self.put()
+
+    def convert_next_bystander(self, to_role):
+        bystanders = Role.all().filter('name', role_bystander)
+        bystanders = bystanders.filter('game', self).order('created')
+        b = bystanders.fetch(1)[0]
+        b.name = to_role
+        b.put()
 
     def create_role(self, name, count=1):
         for i in range(count):
@@ -164,7 +173,7 @@ class Game(UIDModel):
 
     def get_rounds(self):
         return self.round_set.order('-number')
-    
+
     def create_game_threads(self, round):
         # create threads for each of the game threads and 
         # add members to them
@@ -217,7 +226,7 @@ class Game(UIDModel):
 
         self.create_roles()
         round = self.start_next_round()
-        
+
         gs = GameStart(thread=round.get_thread(role_vanillager))
         gs.put()
 
@@ -242,12 +251,12 @@ class Game(UIDModel):
                                     roles))
         mafia_count = len(filter(lambda x: x['name'] == role_mafia, roles))
 
-        
 class Role(UIDModel):
     name = db.StringProperty(choices=roles, required=True)
     game = db.ReferenceProperty(Game, required=True)
     player = db.ReferenceProperty(Profile, default=None, required=True)
     is_dead = db.BooleanProperty(default=False, required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
 
     @classmethod
     def get_by_uid(cls, uid):

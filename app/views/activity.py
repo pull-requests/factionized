@@ -17,7 +17,7 @@ def activities(request, game_id, round_id, thread_id):
         return HttpResponse('Unauthorized', status=401)
 
     if request.method == 'GET':
-        return json(Activity.get_activities(request.user, thread))
+        return json(list(Activity.get_activities(request.user, thread)))
 
     # no POSTs here, return 404
     raise Http404
