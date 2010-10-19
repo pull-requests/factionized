@@ -101,6 +101,7 @@ def vote_summary(request, game_id, round_id, thread_id):
         raise Http404
 
     summaries = VoteSummary.all().filter('thread', thread)
+    summaries = summaries.order('total')
     data = []
     for s in summaries:
         data.append(dict(profile=s.role.player,

@@ -43,6 +43,29 @@
                 $('<h3>' + t.name + ' Vote</h3>').
                     appendTo(thread_vote);
 
+                // Voting summary
+                var vote_summary = $('<div></div>').
+                    attr('class', 'fz-votesummary').
+                    attr('id', 'votesummary_' + t.uid).
+                    appendTo(thread_vote);
+
+                // get the summary
+                var summary_path = '/games/' + game.uid;
+                summary_path += '/rounds/' + init_data.rounds.uid;
+                summary_path += '/threads/' + t.uid;
+                summary_path += '/vote_summary';
+                $.get(summary_path, function(data) {
+                    if (data.summaries.length > 0) {
+                        var sum_list = $('<ul></ul>');
+                        data.summaries.forEach(function(s) {
+                            $('<li></li>').
+                                append(s.profile.name + ': ' + s.total).
+                                appendTo(sum_list);
+                        });
+                        sum_list.appendTo(vote_summary);
+                    }
+                });
+
                 var vote_select = $('<select></select>').
                     attr('id', "vote_select_" + t.uid).
                     attr('name', "vote_select_" + t.uid);
