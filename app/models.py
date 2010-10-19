@@ -398,7 +398,7 @@ class Vote(Activity):
             s = VoteSummary(role=self.target,
                             thread=self.thread,
                             total=0)
-        s.total += 1
+        s.total = s.total + 1
         s.put()
 
     def decrement(self):
@@ -410,7 +410,7 @@ class Vote(Activity):
             s = VoteSummary(role=self.target,
                             thread=self.thread,
                             total=0)
-        s.total -= 1
+        s.total = s.total - 1
         s.put()
 
 
