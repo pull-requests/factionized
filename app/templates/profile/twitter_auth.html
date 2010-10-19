@@ -1,0 +1,24 @@
+<div class="grid_12" id="twitter_auth">
+	<script type="text/javascript">
+		var chk_timer,tw_auth_window;
+		function tw_auth() {
+			tw_auth_window = window.open("http://www.factionized.com/profile/twitter/auth",
+										 "Link Twitter with your Factionized account.",
+										 "width=1000,height=650,scrollbars=no");
+			chk_timer = setInterval("tw_auth_window_chk_closed()",1000);
+		};
+		function tw_auth_window_chk_closed() {
+			if (tw_auth_window && tw_auth_window.closed) {
+				clearInterval(chk_timer);
+				window.location.reload();
+			}
+		};
+		$(document).ready(function() {
+			$('.fz-button.fz-twitter').click(function(e) {
+				tw_auth();
+				return false;
+			});
+		});
+	</script>
+	<a href="javascript:void(0)" class="fz-twitter fz-button">Link to Twitter</a>
+</div><!-- id="twitter_auth" -->

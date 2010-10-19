@@ -1,0 +1,14 @@
+<!-- This really needs to provide feedback -->
+<script type="text/javascript">
+	$(document).ready(function() {
+		$('.fz-button.fz-twitter-post').click(function(e) {
+			var values = {}
+			$('input').each(function() {values[this.name] = $(this).val();});
+			$.ajax({url: "http://www.factionized.com/profile/twitter/feed",
+					context: document.body,
+					type: "POST",
+					data: values,
+					success: function(data) {return false;}});
+		});
+	});
+</script>
