@@ -133,8 +133,7 @@
 		thread.model.activities(function(msgs) {
 			print(msgs);
 			thread.model.onmessage.bind(print);
-			thread.model.stream.from(new Date(1000 * thread.model.last.created));
-			thread.model.stream.start();
+			thread.model.listen()
 		});
 		thread.input.wrap('<div class="fz-textarea fz-wrapper"></div>');
 	};

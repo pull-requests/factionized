@@ -23,7 +23,9 @@
 			return this.thread_url() + '/activities';
 		},
 		listen: function() {
-			this.stream.from(new Date(this.last.created * 1000)).start();
+			this.stream.
+				from(new Date(this.last.created * 1000)).
+				start();
 		},
 		unlisten: function() {
 			this.stream.stop();
