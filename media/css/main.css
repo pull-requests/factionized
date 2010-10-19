@@ -10,9 +10,13 @@ body > #wrapper{
 	min-height:100%;
 }
 
-a { color: #008CD2; }
+a {
+    color: #008CD2;
+    text-decoration:none;
+}
 a:hover{
 	color:#004263;
+    text-decoration:underline;
 }
 a:visited {
 	color: auto;
@@ -147,10 +151,12 @@ a:visited {
 	clear:both;
 }
 #header a{
-	color:#40FC1C;
+	/*color:#40FC1C;*/
+    color:#2DB013;
 }
 #header a:hover{
-	color:#2DB013;
+	/*color:#2DB013;*/
+    color:#40FC1C;
 }
 #header a#masthead{
 	font-size:30px;
@@ -183,3 +189,44 @@ a:visited {
 }
 
 
+.tinywrapper{
+    padding:10px;
+}
+.tinwrapper{
+    -moz-border-radius:5px;
+    -webkit-border-radious5px;
+}
+
+#games-list{
+    background-color:#FFFFFF;
+}
+#games-list ul{
+    list-style:none;
+}
+#games-list ul li{
+    font-size:15px;
+    margin:0 0 3px;
+    padding:0 7px;
+    border-bottom:1px solid #CCC9B9;
+}
+#games-list ul li:hover{
+    background-color:#D7E2FF;
+}
+#games-list ul li.first{
+    border-top:1px solid #CCC9B9;   
+}
+#games-list ul li a{
+    padding:10px 0;
+    display:block;
+    width:100%;
+}
+.sidebar{
+
+}
+.sidebar h3{
+    text-align:center;
+    margin-bottom:5px;
+}
+.sidebar .tinywrapper{
+    background-color:#cfcdc0;
+}
