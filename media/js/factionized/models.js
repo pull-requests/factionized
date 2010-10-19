@@ -8,11 +8,11 @@
 			this.game = thread.round.game;
 			console.log(this.stream_url());
 			var loc = window.location;
-			this.socket = new io.Socket(document.domain,{
-				resource: this.stream_url()
-			});
-			this.socket.on('message', this.onmessage.trigger);
-			this.socket.connect();
+			//this.socket = new io.Socket(document.domain,{
+			//	resource: this.stream_url()
+			//});
+			//this.socket.on('message', this.onmessage.trigger);
+			//this.socket.connect();
 		},
 		thread_url: function() {
 			return [

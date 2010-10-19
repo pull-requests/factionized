@@ -337,11 +337,8 @@ class BaseActivity(polymodel.PolyModel):
         acts = cls.all().filter('thread', thread)
 
         if since:
-            last = cls.get_by_uid(since)
-            if last and last.thread == thread:
-                acts.filter('created >', last.created)
-            else:
-                return []
+            acts.filter('created >', since)
+
         return acts.order('created')
 
 class SystemActivity(BaseActivity):
