@@ -250,7 +250,7 @@ class Role(UIDModel):
         except IndexError, e:
             return None
 
-    def kill(self, killed_by_role, round):
+    def kill(self, killed_by_role, round_number):
         self.is_dead = True
         self.put()
 
@@ -265,7 +265,7 @@ class Role(UIDModel):
         endpoint = endpoint % (txn_id, eul)
         resp = c.post(endpoint)
 
-        if round == 1 and killed_by_role == role_vanillager:
+        if round_number == 1 and killed_by_role == role_vanillager:
             # Bandwagoned. <Nelson>Ha ha!</Nelson>
             endpoint = "named_transaction_group/613292/execute/%s" % eul
             resp = c.post(endpoint)

@@ -97,7 +97,7 @@ def end_round(request, game_id, round_id):
 
     if vote_death_role.name in [role_sheriff, role_doctor]:
         kill_in_threads(vote_death_role, [doctor_thread, sheriff_thread])
-    vote_death_role.kill()
+    vote_death_role.kill(role_vanillager, round.number)
     death = DeathByVote(actor=vote_death_role,
                         vote_thread=village_thread,
                         thread=village_thread)
@@ -162,7 +162,7 @@ def end_round(request, game_id, round_id):
                        mafia_vote_death.player.name,
                        mafia_vote_death.player.user.user_id()))
 
-        mafia_vote_death.kill()
+        mafia_vote_death.kill(role_mafia, round.number)
         death = DeathByVote(actor=mafia_vote_death,
                             vote_thread=mafia_thread,
                             thread=village_thread)
