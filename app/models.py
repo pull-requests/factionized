@@ -328,6 +328,7 @@ class VoteSummary(db.Model):
     thread = db.ReferenceProperty(Thread, required=True)
     role = db.ReferenceProperty(Role, required=True)
     total = db.IntegerProperty(default=0)
+    created = db.DateTimeProperty(auto_now_add=True)
 
 
 class BaseActivity(polymodel.PolyModel):
@@ -392,7 +393,7 @@ class Vote(Activity):
         s = VoteSummary.all().filter("role", self.target)
         s = s.filter("thread", self.thread)
         try:
-            s = s.order("-created")[0]
+            s = s.order("-created").fetch(1)[0]
         except IndexError, e:
             s = VoteSummary(role=self.target,
                             thread=self.thread,
@@ -404,7 +405,7 @@ class Vote(Activity):
         s = VoteSummary.all().filter("role", self.target)
         s = s.filter("thread", self.thread)
         try:
-            s = s.order("-created")[0]
+            s = s.order("-created").fetch(1)[0]
         except IndexError, e:
             s = VoteSummary(role=self.target,
                             thread=self.thread,
