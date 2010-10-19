@@ -13,6 +13,8 @@ from app.models import (Round, VoteSummary, Save, DeathByVote, Reveal,
                         role_bystander, role_vanillager, 
                         role_sheriff, role_doctor, role_mafia, roles)
 
+from django.http import HttpResponse
+
 import random
 
 def get_thread_highest_vote(thread):
@@ -22,7 +24,7 @@ def get_thread_highest_vote(thread):
     """
 
     vote_summary = thread.votesummary_set.order('-total')
-    results = filter(lambda x: x.count == vote_summary[0].count,
+    results = filter(lambda x: x.total == vote_summary[0].total,
                      vote_summary)
     random.shuffle(results)
     if len(results):
@@ -103,10 +105,10 @@ def end_round(request, game_id, round_id):
                         vote_thread=village_thread,
                         thread=village_thread)
 
-    doctor_saves = [x.role for x in filter(lambda x: x.count, 
+    doctor_saves = [x.role for x in filter(lambda x: x.total, 
                                            doctor_thread.votesummary_set) \
                     if x.total]
-    sheriff_reveals = [x.role for x in filter(lambda x: x.count,
+    sheriff_reveals = [x.role for x in filter(lambda x: x.total,
                                               sheriff_thread.votesummary_set) \
                        if x.total]
 
@@ -187,6 +189,8 @@ def end_round(request, game_id, round_id):
 
     logging.debug('game:%s round:%s end round total_time:%s' % \
                   (game.uid, round.uid, (datetime.now() - t).seconds))
+
+    return HttpResponse('ok', status=200)
                  
 def end_game(request, game_id):
    
@@ -215,5 +219,7 @@ def end_game(request, game_id):
     
     game.is_complete = True
     game.put()
+
+    return HttpResponse('ok', status=200)
     
 
