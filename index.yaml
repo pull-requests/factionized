@@ -18,6 +18,14 @@ indexes:
 
 - kind: BaseActivity
   properties:
+  - name: actor
+  - name: class
+  - name: thread
+  - name: created
+    direction: desc
+
+- kind: BaseActivity
+  properties:
   - name: class
   - name: thread
   - name: created

@@ -52,9 +52,22 @@
                     append(p.name).appendTo(vote_select);
                 });
 
+                var vote_action = function() {
+                    var vote_uid = vote_select.find(":selected").val();
+                    var path = '/games/' + game.uid;
+                    path = path + '/rounds/' + init_data.rounds.uid;
+                    path = path + '/threads/' + t.uid;
+                    path = path + '/votes';
+                    var data = {'target_id': vote_uid};
+                    $.post(path, data, function() {
+                        console.log('Voted for '+ vote_uid);
+                    });
+                }
+
                 vote_select.appendTo(thread_vote);
                 $('<span class="fz-button">Vote</span>').
                     attr('href', 'javascript:void(0)').
+                    click(vote_action).
                     appendTo(thread_vote);
                 thread_vote.appendTo(parent);
             });
