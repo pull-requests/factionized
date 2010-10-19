@@ -10,6 +10,11 @@ from app.models import (Game, Round, Thread, thread_pregame, Role,
                         role_bystander)
 from datetime import datetime, timedelta
 
+def test(request, game_id, round_id, thread_id):
+    return render('test.html', dict(game_id=game_id,
+                                    round_id=round_id,
+                                    thread_id=thread_id))
+
 def index(request):
     if request.method == 'GET':
         games = Game.all()
@@ -41,7 +46,7 @@ def view(request, game_id):
     current_round = game.get_current_round()
     rounds = game.get_rounds()
     threads = current_round.get_threads(request.profile)
-    player_list = game.get_player_list()
+    player_list = [r.profile for r in game.get_active_roles()]
                  
     context = dict(profile=request.profile,
                    player_list=player_list,

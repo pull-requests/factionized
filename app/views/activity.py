@@ -1,11 +1,14 @@
 import time
 
 from django.http import Http404, HttpResponse
-from app.models import Activity, Message, Vote, Thread, Role, Game
+from django.conf import settings
+from app.models import (Activity, Message, Vote, Thread, Role, Game,
+                        role_vanillager)
 from app.shortcuts import json
+from bigdoorkit import Client
 
 def activities(request, game_id, round_id, thread_id):
-    thread = Thead.get_by_uid(thread_id)
+    thread = Thread.get_by_uid(thread_id)
     if thread is None:
         raise Http404
 
@@ -20,7 +23,7 @@ def activities(request, game_id, round_id, thread_id):
 
 
 def votes(request, game_id, round_id, thread_id):
-    thread = Thead.get_by_uid(thread_id)
+    thread = Thread.get_by_uid(thread_id)
     if thread is None:
         raise Http404
 
@@ -62,8 +65,19 @@ def votes(request, game_id, round_id, thread_id):
                     target=target,
                     thread=thread)
         vote.put()
+
         # increment the counter
         vote.increment()
+
+        if thread.name == role_vanillager:
+            vote_count = Vote.all().filter('thread', thread).count()
+            if not vote_count:
+                c = Client(settings.BDM_SECRET, settings.BDM_KEY)
+                eul = "profile:%s" % request.profile.uid
+                c.post("/named_transaction_group/613301/execute/%s" % eul)
+                if thread.round.number == 1:
+                    c.post("/named_transaction_group/613302/execute/%s" % eul)
+
         return json(vote)
 
 def messages(request, game_id, round_id, thread_id):
@@ -100,7 +114,7 @@ def messages(request, game_id, round_id, thread_id):
     return HttpResponse('Method Not Allowed', status=405)
 
 def stream(request, game_id, round_id, thread_id):
-    thread = Thead.get_by_uid(thread_id)
+    thread = Thread.get_by_uid(thread_id)
     if thread is None:
         raise Http404
 
@@ -108,13 +122,13 @@ def stream(request, game_id, round_id, thread_id):
         return HttpResponse('Unauthorized', status=401)
 
     if request.method != 'GET':
-        return HttpResponse('Mthod Not Allowed', status=405)
+        return HttpResponse('Method Not Allowed', status=405)
 
     since = request.GET.get('since', None)
     while 1:
         activities = Activity.get_activities(request.user,
                                              thread,
                                              since=since)
-        if len(activities) > 0:
-            return json(activities)
+        if activities.count() > 0:
+            return json(list(activities.run()))
         time.sleep(500)
