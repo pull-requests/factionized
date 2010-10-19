@@ -114,9 +114,15 @@ def messages(request, game_id, round_id, thread_id):
 
     return HttpResponse('Method Not Allowed', status=405)
 
+def long_poll_query(query):
+    while 1:
+        if query.count() > 1:
+            return list(query.run())
+        time.sleep(500)
+
 def stream(request, game_id, round_id, thread_id, timestamp):
     thread = Thread.get_by_uid(thread_id)
-    dt = datetime.fromtimestamp(float(timestamp)/1000)
+    dt = datetime.utcfromtimestamp(float(timestamp)/1000)
 
     print dt
 
@@ -129,10 +135,10 @@ def stream(request, game_id, round_id, thread_id, timestamp):
     if request.method != 'GET':
         return HttpResponse('Method Not Allowed', status=405)
 
-    while 1:
-        activities = Activity.get_activities(request.user,
-                                             thread,
-                                             since=dt)
-        if activities.count() > 0:
-            return json(list(activities.run()))
-        time.sleep(500)
+    activities = Activity.get_activities(request.user,
+                                         thread,
+                                         since=dt)
+    if settings.get('DEV', False):
+        return json(list(activities.run()))
+    else:
+        return json(long_poll_query(activities))
