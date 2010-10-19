@@ -41,7 +41,7 @@
 
 	var join_game = function(game) {
 		var path = '/games/' + game.uid + '/join';
-		$.post(game, function() {
+		$.post(path, function() {
 			console.log('User Joined game');
 		});
 	}

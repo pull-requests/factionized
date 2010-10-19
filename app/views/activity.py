@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 from django.http import Http404, HttpResponse
 from django.conf import settings
@@ -113,8 +114,12 @@ def messages(request, game_id, round_id, thread_id):
 
     return HttpResponse('Method Not Allowed', status=405)
 
-def stream(request, game_id, round_id, thread_id):
+def stream(request, game_id, round_id, thread_id, timestamp):
     thread = Thread.get_by_uid(thread_id)
+    dt = datetime.fromtimestamp(float(timestamp)/1000)
+
+    print dt
+
     if thread is None:
         raise Http404
 
@@ -124,11 +129,10 @@ def stream(request, game_id, round_id, thread_id):
     if request.method != 'GET':
         return HttpResponse('Method Not Allowed', status=405)
 
-    since = request.GET.get('since', None)
     while 1:
         activities = Activity.get_activities(request.user,
                                              thread,
-                                             since=since)
+                                             since=dt)
         if activities.count() > 0:
             return json(list(activities.run()))
         time.sleep(500)

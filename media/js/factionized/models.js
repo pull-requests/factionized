@@ -7,18 +7,22 @@
 			this.round = thread.round;
 			this.game = thread.round.game;
 			console.log(this.stream_url());
-			this.socket = new io.Socket(this.stream_url());
-			this.socket.on('message', this.onmessage.trigger);
+			var loc = window.location;
+			//this.socket = new io.Socket(document.domain,{
+			//	resource: this.stream_url()
+			//});
+			//this.socket.on('message', this.onmessage.trigger);
+			//this.socket.connect();
 		},
 		thread_url: function() {
 			return [
-				'/games', this.game.uid,
+				'games', this.game.uid,
 				'rounds', this.round.uid,
 				'threads', this.id
 			].join('/');
 		},
 		stream_url: function() {
-			return this.thread_url() + '/activities/stream';
+			return this.thread_url() + '/activities';
 		},
 		send: function(content, callback) {
 			$.post(this.thread_url() + '/messages', { content: content }, $.proxy(function() {
@@ -39,6 +43,7 @@
 				evt.unbind('received', cb);
 			}
 			api.trigger = function(msg) {
+				console.log('triggered');
 				evt.trigger('received', msg);
 			}
 			return api;

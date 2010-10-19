@@ -53,10 +53,10 @@ doctor_selector = lambda game: member_selector(game, role=role_doctor)
 dead_selector = lambda game: member_selector(game, alive=False)
 
 thread_profile_selectors = {role_vanillager: vanillager_selector,
-                           role_mafia: mafia_selector,
-                           role_sheriff: sheriff_selector,
-                           role_doctor: doctor_selector,
-                           thread_ghosts: dead_selector}
+                            role_mafia: mafia_selector,
+                            role_sheriff: sheriff_selector,
+                            role_doctor: doctor_selector,
+                            thread_ghosts: dead_selector}
 
 class UIDModel(db.Model):
     """Base class to give models a nicer, URL friendly ID.
@@ -115,13 +115,21 @@ class Game(UIDModel):
             mafia_count = int(floor(mafia_count))
         innocent_count = player_count - (mafia_count + 2) # to include specials
 
-        self.create_role(role_mafia, count=mafia_count)
-        self.create_role(role_doctor)
-        self.create_role(role_sheriff)
+        self.convert_bystander(role_mafia, count=mafia_count)
+        self.convert_bystander(role_doctor)
+        self.convert_bystander(role_sheriff)
+        self.convert_bystander(role_vanillager, count=innocent_count)
 
-        self.create_role(role_vanillager, count=innocent_count)
-        
         self.put()
+
+    def convert_bystander(self, to_role, count=1):
+        bystanders = Role.all().filter('name', role_bystander)
+        bystanders = bystanders.filter('game', self).order('created')
+
+        for i in range(count):
+            b = bystanders[i]
+            b.name = to_role
+            b.put()
 
     def create_role(self, name, count=1):
         for i in range(count):
@@ -164,7 +172,7 @@ class Game(UIDModel):
 
     def get_rounds(self):
         return self.round_set.order('-number')
-    
+
     def create_game_threads(self, round):
         # create threads for each of the game threads and 
         # add members to them
@@ -179,6 +187,9 @@ class Game(UIDModel):
         return threads
 
     def start_next_round(self):
+        if self.is_over():
+            raise FactionizeError, 'can not start new round as game is over'
+
         last_round = self.get_rounds()
         if last_round.count():
             last_round = last_round[0]
@@ -214,7 +225,7 @@ class Game(UIDModel):
 
         self.create_roles()
         round = self.start_next_round()
-        
+
         gs = GameStart(thread=round.get_thread(role_vanillager))
         gs.put()
 
@@ -222,20 +233,29 @@ class Game(UIDModel):
         self.put()
 
     def is_over(self):
+        return self.is_innocent_victory() or self.is_mafia_victory()
+
+    def is_innocent_victory(self):
+        remaining_counts = self.remaining_counts()
+        return remaining_counts['mafia'] == 0
+
+    def is_mafia_victor(self):
+        remaining_counts = self.remaining_counts()
+        return remaining_counts['innocent'] < remaining_counts['mafia']
+
+    def remaining_counts(self):
         roles = self.get_active_roles()
         innocent_roles = [role_vanillager, role_sheriff, role_doctor]
         innocent_count = len(filter(lambda x: x['name'] in innocent_roles,
                                     roles))
         mafia_count = len(filter(lambda x: x['name'] == role_mafia, roles))
 
-        return mafia_count == 0 or mafia_count > innocent_count
-
-        
 class Role(UIDModel):
     name = db.StringProperty(choices=roles, required=True)
     game = db.ReferenceProperty(Game, required=True)
     player = db.ReferenceProperty(Profile, default=None, required=True)
     is_dead = db.BooleanProperty(default=False, required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
 
     @classmethod
     def get_by_uid(cls, uid):
@@ -325,11 +345,8 @@ class BaseActivity(polymodel.PolyModel):
         acts = cls.all().filter('thread', thread)
 
         if since:
-            last = cls.get_by_uid(since)
-            if last and last.thread == thread:
-                acts.filter('created >', last.created)
-            else:
-                return []
+            acts.filter('created >', since)
+
         return acts.order('created')
 
 class SystemActivity(BaseActivity):
@@ -401,3 +418,8 @@ class Vote(Activity):
 class PlayerJoin(Activity):
     pass
 
+class MafiaWin(SystemActivity):
+    pass
+
+class InnocentWin(SystemActivity):
+    pass
