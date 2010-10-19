@@ -4,7 +4,7 @@
 		$('.fz-button.fz-twitter-post').click(function(e) {
 			var values = {}
 			$('input').each(function() {values[this.name] = $(this).val();});
-			$.ajax({url: "http://www.factionized.com/profile/twitter/feed",
+			$.ajax({url: "http://factionized.appspot.com/profile/twitter/feed",
 					context: document.body,
 					type: "POST",
 					data: values,

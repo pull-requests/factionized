@@ -4,7 +4,7 @@
 		$('.fz-button.fz-facebook-post').click(function(e) {
 			var values = {}
 			$('input').each(function() {values[this.name] = $(this).val();});
-			$.ajax({url: "http://www.factionized.com/profile/facebook/feed",
+			$.ajax({url: "http://factionized.appspot.com/profile/facebook/feed",
 					context: document.body,
 					type: "POST",
 					data: values,
