@@ -6,6 +6,7 @@
 			this.raw = thread;
 			this.round = thread.round;
 			this.game = thread.round.game;
+			console.log(this.stream_url());
 			this.socket = new io.Socket(this.stream_url());
 			this.socket.on('message', this.onmessage.trigger);
 		},
