@@ -5,7 +5,7 @@ from django.http import Http404, HttpResponse
 from django.conf import settings
 from google.appengine.runtime import DeadlineExceededError
 from app.models import (Activity, Message, Vote, Thread, Role, Game,
-                        Profile, role_vanillager)
+                        Profile, VoteSummary, role_vanillager)
 from app.shortcuts import json
 from bigdoorkit import Client
 
@@ -88,6 +88,29 @@ def votes(request, game_id, round_id, thread_id):
                     c.post("named_transaction_group/613302/execute/%s" % eul)
 
         return json(vote)
+
+def vote_summary(request, game_id, round_id, thread_id):
+    thread = Thread.get_by_uid(thread_id)
+    if thread is None:
+        raise Http404
+
+    if not thread.profile_can_view(request.profile):
+        return HttpResponse('Unauthorized', status=401)
+
+    # only deals with GET requests
+    if not request.method == 'GET':
+        raise Http404
+
+    summaries = VoteSummary.all().filter('thread', thread)
+    summaries = summaries.order('-total')
+    data = []
+    for s in summaries:
+        data.append(dict(profile=s.role.player,
+                         total=s.total,
+                         updated=s.updated))
+
+    return json(dict(thread=thread, summaries=data))
+
 
 def messages(request, game_id, round_id, thread_id):
     thread = Thread.get_by_uid(thread_id)
