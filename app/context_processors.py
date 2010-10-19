@@ -13,8 +13,8 @@ def google_user(request):
         context['user'] = request.user
     if request and hasattr(request, 'profile') and request.profile:
         context['profile'] = request.profile
-
     # Add the Facebook API key to the context for easy retrieval
     context['fb_app_id'] = settings.FACEBOOK_APP_ID
     context['fb_key'] = settings.FACEBOOK_API_KEY
+
     return context
