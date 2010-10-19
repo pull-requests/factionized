@@ -21,7 +21,7 @@
 			evt.unbind('received', cb);
 		};
 		this.trigger = function(data) {
-			evt.trigger(data);
+			evt.trigger('received', data);
 		};
 		this.stopped = true;
 		this.from();

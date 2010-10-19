@@ -22,6 +22,12 @@
 		stream_url: function() {
 			return this.thread_url() + '/activities';
 		},
+		listen: function() {
+			this.stream.from(new Date(this.last.created * 1000)).start();
+		},
+		unlisten: function() {
+			this.stream.stop();
+		},
 		send: function(content, callback) {
 			$.post('/' + this.thread_url() + '/messages', { content: content }, $.proxy(function(data) {
 				if( $.isFunction(callback) ) {
