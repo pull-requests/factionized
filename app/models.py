@@ -85,11 +85,12 @@ class Game(UIDModel):
     signup_deadline = db.DateTimeProperty(required=True)
     signups = db.ListProperty(db.Key)
     started = db.DateTimeProperty()
+    is_complete = db.BooleanProperty(default=False, required=True)
 
-    def get_player_list(self):
+    def get_active(self):
         role_query = self.role_set.filter('name !=', role_bystander)
         role_query = role_query.filter('is_dead', False)
-        return [r.profile for r in role_query]
+        return role_query
 
     def create_roles(self):
         # find out how many players there are
@@ -210,6 +211,16 @@ class Game(UIDModel):
 
         self.started = datetime.now()
         self.put()
+
+    def is_over(self):
+        roles = self.get_active_roles()
+        innocent_roles = [role_vanillager, role_sheriff, role_doctor]
+        innocent_count = len(filter(lambda x: x['name'] in innocent_roles,
+                                    roles))
+        mafia_count = len(filter(lambda x: x['name'] == role_mafia, roles))
+
+        return mafia_count == 0 or mafia_count > innocent_count
+
         
 class Role(UIDModel):
     name = db.StringProperty(choices=roles, required=True)
