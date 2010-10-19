@@ -176,7 +176,7 @@ def long_poll_query(query):
 
 def stream(request, game_id, round_id, thread_id, timestamp):
     thread = Thread.get_by_uid(thread_id)
-    dt = datetime.utcfromtimestamp(float(timestamp)/1000)
+    dt = datetime.utcfromtimestamp(float(timestamp)/float(1000))
 
     if thread is None:
         raise Http404
