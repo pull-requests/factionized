@@ -279,6 +279,15 @@ a:visited {
     display:block;
     width:100%;
 }
+#games-list .game-status{
+    float:right;
+    width:140px;
+    font-style:italic;
+}
+#games-list .game-name{
+    text-align:left;
+    font-weight:bold;
+}
 .sidebar{
 
 }
