@@ -14,7 +14,7 @@ class FacebookUser(object):
         self.graph = facebook.GraphAPI(profile.fb_token)
         #user = self.graph.get_object("me")
 
-    def post_to_wall(self,message,image_url,link,caption=None):
+    def post_to_feed(self,message,image_url,caption=None):
         """Post message/image_url to profile.fb_user's wall
 
         {"name": "Link name",
@@ -23,6 +23,7 @@ class FacebookUser(object):
         "description": "This is a longer description of the attachment",
         "picture": "http://www.example.com/thumbnail.jpg"}
         """
+        link = 'http://www.factionized.com'
         put_data = {"picture":image_url,
                     "caption":caption,
                     "link":link}

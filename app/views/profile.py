@@ -2,11 +2,16 @@ import re
 import cgi
 import urllib
 
+from hashlib import sha1
+from hmac import new as hmac
+from random import getrandbits
+from time import time
+
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from google.appengine.api import urlfetch
 
 from app.decorators import login_required
@@ -14,7 +19,9 @@ from app.models import Profile
 from app.shortcuts import render
 
 from app.lib import facebook
+from app.lib import oauth2 as oauth
 from app.lib.fb import FacebookUser
+from app.lib.tw import TwitterUser
 
 #from bigdoorkit.resources.user import EndUser
 
@@ -33,10 +40,10 @@ def show(request, profile_id):
     eul = "profile:%s" % profile.uid
     c = Client(settings.BDM_SECRET, settings.BDM_KEY)
     try:
-        bd_end_user = c.get('end_user/%s' % eul)
+        bd_end_user = c.get('end_user/%s' % eul)[0]
     except ValueError, e:
         payload = dict(end_user_login=eul)
-        bd_end_user = c.post('end_user', payload=payload)
+        bd_end_user = c.post('end_user', payload=payload)[0]
 
     if profile.uid == request.profile.uid:
         is_editable = True
@@ -107,11 +114,16 @@ def service_feed(request, service_name):
             return HttpResponse(status=400)
 
         if service_name == 'facebook':
-            link = 'http://www.factionized.com'
 
             fb_user = FacebookUser(profile)
-            fb_user.post_to_wall(message,image_url,link,caption)
-            params = {'message':message,'image':image_url,'link':link,'caption':caption}
+            fb_user.post_to_feed(message,image_url,caption)
+            params = {'message':message,'image':image_url,'caption':caption}
+            return render('profile/post.html', {'params':params})
+
+        elif service_name == 'twitter':
+            tw_user = TwitterUser(profile)
+            tw_user.post_to_feed(message,image_url,caption)
+            params = {'message':message,'image':image_url,'caption':caption}
             return render('profile/post.html', {'params':params})
 
     raise NotImplementedError, 'may not be used'
@@ -141,7 +153,7 @@ def facebook_auth(request):
         profile.put()
 
         auth_response = HttpResponse()
-        auth_response.content = return_self_closing_html()
+        auth_response.content = return_self_closing_page()
 
         return auth_response
     else:
@@ -150,9 +162,56 @@ def facebook_auth(request):
         return HttpResponseRedirect(auth_url % urllib.urlencode(args))
 
 def twitter_auth(request):
-    pass
+    profile = request.profile
 
-def return_self_closing_html():
+    if profile.tw_token and profile.tw_token_secret:
+        # We have already authorized user
+        auth_response = HttpResponse()
+        auth_response.content = return_self_closing_page()
+
+        return auth_response
+
+    auth_token = request.GET.get("oauth_token",None)
+
+    # Check if we're operating as callback
+    if auth_token:
+        oauth_consumer = oauth.Consumer(key=getattr(settings, 'TWITTER_API_KEY'),
+                                        secret=getattr(settings, 'TWITTER_SECRET_KEY'))
+        oauth_client = oauth.Client(oauth_consumer)
+        resp, content = oauth_client.request('https://api.twitter.com/oauth/access_token',
+                                             method='POST',
+                                             body='oauth_token=%s' % (auth_token))
+
+        content = dict(cgi.parse_qsl(content))
+
+        profile.tw_token = content['oauth_token']
+        profile.tw_token_secret = content['oauth_token_secret']
+        profile.tw_auth = True
+        profile.put()
+
+        auth_response = HttpResponse()
+        auth_response.content = return_self_closing_page()
+
+        return auth_response
+
+
+    signature_method = oauth.SignatureMethod_HMAC_SHA1()
+    oauth_consumer = oauth.Consumer(key=getattr(settings, 'TWITTER_API_KEY'),
+                                    secret=getattr(settings, 'TWITTER_SECRET_KEY'))
+    oauth_client = oauth.Client(oauth_consumer)
+    resp, content = oauth_client.request('https://api.twitter.com/oauth/request_token', 'GET')
+
+    content = dict(cgi.parse_qsl(content))
+    redirect_uri = request.build_absolute_uri()
+    redirect_uri = redirect_uri.split("?")[0]
+
+    auth_url = '%s?oauth_token=%s&oauth_callback=%s' % ('https://api.twitter.com/oauth/authorize',
+                                                        content['oauth_token'],
+                                                        redirect_uri)
+
+    return HttpResponseRedirect(auth_url)
+
+def return_self_closing_page():
     ret_val = """
         <html>
             <head>

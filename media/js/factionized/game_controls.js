@@ -121,8 +121,10 @@
 
 	var join_game = function(game) {
 		var path = '/games/' + game.uid + '/join';
-		$.post(path, function() {
-			console.log('User Joined game');
+		$.post(path, function(data, statusText) {
+			if(statusText == 'success') {
+				window.location = window.location;
+			}
 		});
 	}
 
