@@ -14,6 +14,7 @@ class GoogleUserMiddleware(object):
                 request.profile = Profile.all().filter('user =', user)[0]
             except IndexError, e:
                 p = Profile(user=user)
+                p.name = user.nickname
                 p.put()
                 request.profile = p
 
