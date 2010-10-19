@@ -53,10 +53,10 @@ doctor_selector = lambda game: member_selector(game, role=role_doctor)
 dead_selector = lambda game: member_selector(game, alive=False)
 
 thread_profile_selectors = {role_vanillager: vanillager_selector,
-                           role_mafia: mafia_selector,
-                           role_sheriff: sheriff_selector,
-                           role_doctor: doctor_selector,
-                           thread_ghosts: dead_selector}
+                            role_mafia: mafia_selector,
+                            role_sheriff: sheriff_selector,
+                            role_doctor: doctor_selector,
+                            thread_ghosts: dead_selector}
 
 class UIDModel(db.Model):
     """Base class to give models a nicer, URL friendly ID.
@@ -179,6 +179,9 @@ class Game(UIDModel):
         return threads
 
     def start_next_round(self):
+        if self.is_over():
+            raise FactionizeError, 'can not start new round as game is over'
+
         last_round = self.get_rounds()
         if last_round.count():
             last_round = last_round[0]
@@ -222,13 +225,22 @@ class Game(UIDModel):
         self.put()
 
     def is_over(self):
+        return self.is_innocent_victory() or self.is_mafia_victory()
+
+    def is_innocent_victory(self):
+        remaining_counts = self.remaining_counts()
+        return remaining_counts['mafia'] == 0
+
+    def is_mafia_victor(self):
+        remaining_counts = self.remaining_counts()
+        return remaining_counts['innocent'] < remaining_counts['mafia']
+
+    def remaining_counts(self):
         roles = self.get_active_roles()
         innocent_roles = [role_vanillager, role_sheriff, role_doctor]
         innocent_count = len(filter(lambda x: x['name'] in innocent_roles,
                                     roles))
         mafia_count = len(filter(lambda x: x['name'] == role_mafia, roles))
-
-        return mafia_count == 0 or mafia_count > innocent_count
 
         
 class Role(UIDModel):
@@ -401,3 +413,8 @@ class Vote(Activity):
 class PlayerJoin(Activity):
     pass
 
+class MafiaWin(SystemActivity):
+    pass
+
+class InnocentWin(SystemActivity):
+    pass
