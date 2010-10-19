@@ -1,5 +1,8 @@
 from app.lib import facebook
-import json
+try:
+    import json
+except:
+    from django.utils import simplejson
 from django.conf import settings
 
 from app.models import Profile
