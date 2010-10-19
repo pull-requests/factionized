@@ -16,6 +16,12 @@ indexes:
   - name: thread
   - name: created
 
+- kind: BaseActivity
+  properties:
+  - name: class
+  - name: thread
+  - name: created
+
 - kind: Role
   properties:
   - name: game

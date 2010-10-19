@@ -130,5 +130,5 @@ def stream(request, game_id, round_id, thread_id):
                                              thread,
                                              since=since)
         if activities.count() > 0:
-            return json(activities.run())
+            return json(list(activities.run()))
         time.sleep(500)
