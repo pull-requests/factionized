@@ -111,6 +111,9 @@
                         appendTo(sum_list);
                 });
                 sum_list.appendTo(vote_summary);
+                $('<img/>').
+                    attr('src', data.chart_url).
+                    appendTo(vote_summary);
             }
         });
         old_summary.replaceWith(vote_summary);

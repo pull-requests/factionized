@@ -413,11 +413,11 @@ class Vote(Activity):
         s = s.filter("thread", self.thread)
         try:
             s = s.order("-created").fetch(1)[0]
+            s.total = s.total - 1
         except IndexError, e:
             s = VoteSummary(role=self.target,
                             thread=self.thread,
                             total=0)
-        s.total = s.total - 1
         s.put()
 
 
