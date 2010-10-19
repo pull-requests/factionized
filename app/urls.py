@@ -44,6 +44,9 @@ urlpatterns += patterns('app.views.activity',
     url(r'^games/(?P<game_id>\w+)/rounds/(?P<round_id>\w+)/threads/(?P<thread_id>\w+)/messages$',
         'messages',
         name='message_list'),
+    url(r'^games/(?P<game_id>\w+)/rounds/(?P<round_id>\w+)/threads/(?P<thread_id>\w+)/vote_summary$',
+        'vote_summary',
+        name='vote_summary'),
 )
 
 # Round End Task
