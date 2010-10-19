@@ -9,7 +9,8 @@ from django.core.urlresolvers import reverse
 
 from app.exc import FactionizeTaskException
 from app.models import (Round, VoteSummary, Save, DeathByVote, Reveal, 
-                        Profile, Game, role_bystander, role_vanillager, 
+                        Profile, Game, MafiaWin, InnocentWin,
+                        role_bystander, role_vanillager, 
                         role_sheriff, role_doctor, role_mafia, roles)
 
 import random
@@ -190,6 +191,7 @@ def end_game(request, game_id):
     t = datetime.now()
 
     game = Game.get_by_uid(game_id)
+    last_round = game.get_current_round()
     
     if not game.is_over():
         logging.critical('game:%s game end task called but game is not over' % \
@@ -203,7 +205,12 @@ def end_game(request, game_id):
         raise FactionizeTaskException, 'game is already marked as complete'
 
     # do lots of processing here to assign various awards
-
+    if game.is_innocent_victory():
+        win = InnocentWin(thread=last_round.get_thread(role_vanillager))
+    else:
+        win = MafiaWin(thread=last_round.get_thread(role_vanillager))
+    win.put()
+    
     game.is_complete = True
     game.put()
     
