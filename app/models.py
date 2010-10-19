@@ -87,7 +87,7 @@ class Game(UIDModel):
     started = db.DateTimeProperty()
     is_complete = db.BooleanProperty(default=False, required=True)
 
-    def get_active(self):
+    def get_active_roles(self):
         role_query = self.role_set.filter('name !=', role_bystander)
         role_query = role_query.filter('is_dead', False)
         return role_query

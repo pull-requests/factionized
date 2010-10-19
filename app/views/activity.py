@@ -108,7 +108,7 @@ def stream(request, game_id, round_id, thread_id):
         return HttpResponse('Unauthorized', status=401)
 
     if request.method != 'GET':
-        return HttpResponse('Mthod Not Allowed', status=405)
+        return HttpResponse('Method Not Allowed', status=405)
 
     since = request.GET.get('since', None)
     while 1:
