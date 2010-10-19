@@ -1,8 +1,11 @@
+import logging
+
 from google.appengine.api import users
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 
 def login(request):
+
     user = users.get_current_user()
 
     next = request.GET.get('next', reverse('auth_login'))

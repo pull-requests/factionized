@@ -76,7 +76,9 @@
 					append(
 						$('<td class="fz-meta" />').append(
 							$('<span />').addClass('fz-label').append(content.label),
-							$('<span />').addClass('fz-created').append(from_timestamp(v.created))
+							$('<span />').
+								addClass('fz-created').
+								append(FZ.from_timestamp(v.created))
 						),
 						$('<td class="fz-content" />').append(content.content)
 					).
@@ -91,13 +93,6 @@
 			}
 		};
 		
-		var from_timestamp = function(stamp) {
-			var dat = new Date(stamp * 1000);
-			var mins = dat.getMinutes();
-			if( mins < 10 ) { mins = '0' + mins; }
-			return (dat.getMonth() + '-' + dat.getDate() + '-' + dat.getFullYear() + ' @ ' + dat.getHours() + ':' + mins);
-		};
-
 		var goto_bottom = function() {
 			thread.log[0].scrollTop = thread.log[0].scrollHeight;
 		};
@@ -135,8 +130,11 @@
 				});
 			}
 		});
-		thread.model.activities(print);
-		thread.model.onmessage.bind(print);
+		thread.model.activities(function(msgs) {
+			print(msgs);
+			thread.model.onmessage.bind(print);
+			thread.model.listen()
+		});
 		thread.input.wrap('<div class="fz-textarea fz-wrapper"></div>');
 	};
 
@@ -152,12 +150,45 @@
 		};
 	};
 
+	parse.save = function(msg) {
+		return {
+			label: (msg.actor.player.name || msg.actor.player.user.email),
+			content: (msg.target.player.name || 
+						msg.targe.player.user.email) + 
+						' was saved by the doctor!'
+		}
+	};
+	parse.reveal = function(msg) {
+		return {
+			label: (msg.actor.player.name || msg.actor.player.user.email),
+			content: (msg.target.player.name || msg.target.player.user.email) + 
+				' was revealed to be a ' + msg.target.name
+		}
+	};
+
 	parse.message = function(msg) {
 		return {
 			label: (msg.actor.player.name || msg.actor.player.user.email),
 			content: msg.content
 		}
 	};
+
+	parse.deathbyvote = function(msg) {
+		return {
+			label: 'Game Notice',
+			content: (msg.actor.player.name || msg.actor.player.user.email) +
+				' was killed by ' + 
+				(msg.vote_thread.name === 'Vanillager' ? 'vote' : 'mafia')
+		}
+	};
+
+	parse.vote = function(msg) {
+		return {
+			label: (msg.actor.player.name || msg.actor.player.user.email),
+			content: '!vote for ' + 
+				(msg.target.player.name || msg.actor.player.user.email)
+		}
+	}
 
 	// Clears out parent html and removes pre-existing data
 	var destroy = function() {

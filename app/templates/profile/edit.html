@@ -20,7 +20,6 @@
 			{% if profile.fb_auth == 1 or profile.tw_auth == 1 %}
 			<form method="post" action="http://www.factionized.com/profile/facebook/feed">
 				<fieldset>
-				{% csrf_token %}
 					<input type="hidden"
 						   name="message"
 						   value="{{ level.end_user_title }}" />

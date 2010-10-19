@@ -9,9 +9,11 @@ from django.core.urlresolvers import reverse
 
 from app.exc import FactionizeTaskException
 from app.models import (Round, VoteSummary, Save, DeathByVote, Reveal, 
-                        Profile, Game, MafiaWin, InnocentWin,
+                        Vote, Profile, Game, MafiaWin, InnocentWin,
                         role_bystander, role_vanillager, 
                         role_sheriff, role_doctor, role_mafia, roles)
+
+from django.http import HttpResponse
 
 import random
 
@@ -22,7 +24,7 @@ def get_thread_highest_vote(thread):
     """
 
     vote_summary = thread.votesummary_set.order('-total')
-    results = filter(lambda x: x.count == vote_summary[0].count,
+    results = filter(lambda x: x.total == vote_summary[0].total,
                      vote_summary)
     random.shuffle(results)
     if len(results):
@@ -43,8 +45,8 @@ def kill_in_threads(role, threads):
     Used when a role is killed before their action is resolved
     """
     for t in threads:
-        votes = role.vote_set.filter('thread', t).order('-created')
-        if votes and len(votes):
+        votes = Vote.all().filter('actor', role).filter('thread', t).order('-created')
+        if votes and votes.count():
             votes[0].decrement()
 
 def filter_invalidated(activity_stream):
@@ -58,9 +60,8 @@ def filter_invalidated(activity_stream):
         if a.thread.name not in temp:
             temp[a.thread.name] = {}
         temp[a.thread.name][a.actor.uid] = \
-                max([a, temp[a.thread.name].get(a.actor.uid, 
-                                                {'created':datetime.min})],
-                    key = lambda x: x['created'])
+                max([a, temp[a.thread.name].get(a.actor.uid, a)],
+                    key = lambda x: x.created)
     filtered = []
     for k,v in temp.iteritems():
         for x,y in v.iteritems():
@@ -103,10 +104,10 @@ def end_round(request, game_id, round_id):
                         vote_thread=village_thread,
                         thread=village_thread)
 
-    doctor_saves = [x.role for x in filter(lambda x: x.count, 
+    doctor_saves = [x.role for x in filter(lambda x: x.total, 
                                            doctor_thread.votesummary_set) \
                     if x.total]
-    sheriff_reveals = [x.role for x in filter(lambda x: x.count,
+    sheriff_reveals = [x.role for x in filter(lambda x: x.total,
                                               sheriff_thread.votesummary_set) \
                        if x.total]
 
@@ -116,7 +117,7 @@ def end_round(request, game_id, round_id):
     if len(sheriff_reveals):
         # we know a reveal is valid and who should be revealed, but
         # not who did it, so figure that out
-        revealers = filter_invalidated(sheriff_thread.vote_set)
+        revealers = filter_invalidated(Vote.all().filter('thread', sheriff_thread))
         for r in revealers:
 
             logging.debug(('game:%s round:%s sheriff reveal actor:%s ' + \
@@ -137,17 +138,18 @@ def end_round(request, game_id, round_id):
     if mafia_vote_death.uid in [ds.uid for ds in doctor_saves]:
         # we know that somebody successfully saved, but not who yet
         # figure that out here
-        saviours = filter_invalidated(doctor_thread.vote_set)
-        for s in saviours.filter(lambda x: \
-                                    x.target.uid == mafia_vote_death.uid,
-                                 saviours):
+        saviours = filter_invalidated(Vote.all().filter('thread', 
+                                                        doctor_thread))
+        for s in filter(lambda x: x.target.uid == mafia_vote_death.uid,
+                        saviours):
 
-            logging.debug('game:%s round:%s nurse save actor:%s target:%s' % \
+            logging.debug(('game:%s round:%s nurse save actor:%s target:%s' + \
+                          'role:%s') % \
                           (game.uid,
                            round.uid,
-                           r.actor.uid,
-                           r.target.uid,
-                           r.target.name))
+                           s.actor.uid,
+                           s.target.uid,
+                           s.target.name))
 
             save = Save(actor=s.actor,
                         target=s.target,
@@ -170,21 +172,25 @@ def end_round(request, game_id, round_id):
         death.put()
     
     if not game.is_over():
-        logging.debug('game:%s round:%s starting next round')
+        logging.debug('game:%s round:%s starting next round' % \
+                      (game.uid, round.uid))
         r = game.start_next_round()
         logging.debug('game:%s started new round:%s' % (game.uid, r.uid))
         assert r.number == round.number + 1 # sanity check
-        taskqueue.add(url=reverse('round_end', kwargs={'game_id':game.uid,
+        taskqueue.add(url=reverse('end_round', kwargs={'game_id':game.uid,
                                                         'round_id':r.uid}),
                       method='POST',
                       countdown=r.length())
     else:
-        logging.debug('game:%s round:%s has hit the end game condition')
-        taskqueue.add(url=reverse('game_end', kwargs={'game_id':game.uid}),
+        logging.debug('game:%s round:%s has hit the end game condition' %  \
+                      (game.uid, round.uid))
+        taskqueue.add(url=reverse('end_game', kwargs={'game_id':game.uid}),
                       method='POST')
 
     logging.debug('game:%s round:%s end round total_time:%s' % \
                   (game.uid, round.uid, (datetime.now() - t).seconds))
+
+    return HttpResponse('ok', status=200)
                  
 def end_game(request, game_id):
    
@@ -213,5 +219,7 @@ def end_game(request, game_id):
     
     game.is_complete = True
     game.put()
+
+    return HttpResponse('ok', status=200)
     
 

@@ -1,12 +1,13 @@
 {% extends 'shared/layouts/canvas.html' %}
 
+{% load humanize %}
+
 {% block canvas %}
 	<h1 class="grid_12">Games</h1>
     <div class="grid_4 push_8 sidebar">
         <div class="tinywrapper">
             <form method="POST" action="/games">
                 <h3>Create a new game</h3>
-                {% csrf_token %}
                 <label for="name">Name:</label>
                 <input type="text" name="name" id="name" />
                 <input type="submit" value="Create" />
@@ -18,7 +19,25 @@
             <p>List of current and historical games filtered by user, date, etc.</p>
                 <ul>
                     {% for game in games %}
-                    <li{% if forloop.first %} class="first"{% endif %}><a href="/games/{{game.uid}}">{{game.name}}</a></li>
+                    <li{% if forloop.first %} class="first"{% endif %}>
+                        <a href="/games/{{game.uid}}">
+                            <span class="game-name">{{game.name}}</span>
+                            <div class="game-description">
+                                Started by {{ game.game_starter.user.nickname }}
+                                <span class="game-status">
+                                    {% ifequal game.get_current_round.number 0 %}
+                                    Game not started ({{ game.signups|length }} players)
+                                    {% else %}
+                                        {% if game.is_over %}
+                                            Game finished
+                                        {% else %}
+                                            Round: {{ game.get_current_round.number|apnumber }}
+                                        {% endif %}
+                                    {% endifequal %}
+                                </span>
+                            </div>
+                        </a>
+                    </li>
                     {% endfor %}  
                 </ul>
         </div>
