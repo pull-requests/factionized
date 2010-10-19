@@ -1,3 +1,4 @@
+import logging
 import time
 from datetime import datetime
 
@@ -96,7 +97,8 @@ def messages(request, game_id, round_id, thread_id):
                                            since=since))
 
     if request.method == 'POST':
-        if thread.profile_can_create(request.profile):
+
+        if not thread.profile_can_create(request.profile):
             return HttpResponse('Unauthorized', status=401)
 
         content = request.POST.get('content', None)

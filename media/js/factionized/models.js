@@ -7,10 +7,10 @@
 			this.round = thread.round;
 			this.game = thread.round.game;
 			var loc = window.location;
-			//this.socket = new io.Socket(document.domain,{
-			//	resource: this.stream_url()
-			//});
-			//this.socket.on('message', this.onmessage.trigger);
+			this.socket = new io.Socket(document.domain,{
+				resource: this.stream_url()
+			});
+			this.socket.on('message', this.onmessage.trigger);
 		},
 		thread_url: function() {
 			return [

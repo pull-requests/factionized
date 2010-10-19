@@ -1,3 +1,5 @@
+import logging 
+
 from google.appengine.ext import db
 from google.appengine.ext.db import polymodel
 
@@ -118,7 +120,7 @@ class Game(UIDModel):
         available_roles = [role_mafia for i in range(mafia_count)]
         available_roles.append(role_doctor)
         available_roles.append(role_sheriff)
-        available_roles += [role_vanillager for i in range(mafia_count)]
+        available_roles += [role_vanillager for i in range(innocent_count)]
         shuffle(available_roles)
 
         for rolename in available_roles:
@@ -127,18 +129,10 @@ class Game(UIDModel):
         self.put()
 
     def convert_next_bystander(self, to_role):
-        bystanders = Role.all().filter('name', role_bystander)
-        bystanders = bystanders.filter('game', self).order('created')
-        b = bystanders.fetch(1)[0]
+        bystanders = self.role_set.filter('name', role_bystander).order('created')
+        b = bystanders.get()
         b.name = to_role
         b.put()
-
-    def create_role(self, name, count=1):
-        for i in range(count):
-            r = Role(name=name,
-                     player=self.signups.pop(0),
-                     game=self)
-            r.put()
 
     def add_to_waitlist(self, profile):
 
@@ -241,16 +235,18 @@ class Game(UIDModel):
         remaining_counts = self.remaining_counts()
         return remaining_counts['mafia'] == 0
 
-    def is_mafia_victor(self):
+    def is_mafia_victory(self):
         remaining_counts = self.remaining_counts()
         return remaining_counts['innocent'] < remaining_counts['mafia']
 
     def remaining_counts(self):
         roles = self.get_active_roles()
         innocent_roles = [role_vanillager, role_sheriff, role_doctor]
-        innocent_count = len(filter(lambda x: x['name'] in innocent_roles,
+        innocent_count = len(filter(lambda x: x.name in innocent_roles,
                                     roles))
-        mafia_count = len(filter(lambda x: x['name'] == role_mafia, roles))
+        mafia_count = len(filter(lambda x: x.name == role_mafia, roles))
+        return dict(mafia=mafia_count,
+                    innocent=innocent_count)
 
 class Role(UIDModel):
     name = db.StringProperty(choices=roles, required=True)
@@ -318,12 +314,12 @@ class Thread(UIDModel):
         return self.name in public_threads
 
     def profile_can_view(self, profile):
-        if self.is_public() or profile in self.members:
+        if self.is_public() or profile.key() in self.members:
             return True
         return False
 
     def profile_can_create(self, profile):
-        if profile in self.members:
+        if profile.key() in self.members:
             return True
         return False
 
