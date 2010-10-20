@@ -10,41 +10,16 @@
 	</div>
 	<div class="grid_12"  id="awards_pane">
 		<h2>Awards</h2>
+		{% if bd_end_user.level_summaries %}
 		<div class="subhead">Awards go here</div>
-		{% for level in bd_end_user.levels %}
-		<div id="fz-level">
-			<div class="levelwrapper">
-			<img id="fz-level-image" src={{ level.url }} height="200px" width="200px" /><br />
-			<div id="fz-level-label"><label for="fz-level-image">{{ level.end_user_title }}</label></div>
-			<div id="fz-level-description">{{ level.end_user_description }}</div>
-			{% if profile.fb_auth == 1 or profile.tw_auth == 1 %}
-			<form method="post" action="http://factionized.appspot.com/profile/facebook/feed">
-				<fieldset>
-					<input type="hidden"
-						   name="message"
-						   value="{{ level.end_user_title }}" />
-					<input type="hidden"
-						   name="image_url"
-						   value="{{ level.url }}" />
-					<input type="hidden"
-						   name="caption"
-						   value="{{ level.end_user_description }}" />
-					{% ifequal profile.fb_auth 1 %}
-					<button type="button" class="fz-facebook-post fz-button">Post it to Facebook!</button>
-					{% endifequal %}
-					{% ifequal profile.tw_auth 1 %}
-					<button type="button" class="fz-twitter-post fz-button">Post it to Twitter!</button>
-					{% endifequal %}
-				</fieldset>
-			</form>
-			{% endif %}
-			</div>
-		</div>
-		{% endfor %}
+		{% include 'award/display_action.html' %}
+		{% else %}
+		<div class="subhead">You haven't earned any awards yet! Go kill some Gangsters!</div>
+		{% endif %}
 	</div>
 	<div class="grid_12" id="facebook_pane">
-		<h2>Facebook</h2>
 		{% ifequal profile.fb_auth 0 %}
+		<h2>Authorize Facebook</h2>
 		{% include 'profile/facebook_auth.html' %}
 		{% else %}
 		{% include 'profile/facebook_js.html' %}
@@ -52,6 +27,7 @@
 	</div>
 	<div id="twitter_pane">
 		{% ifequal profile.tw_auth 0 %}
+		<h2>Authorize Twitter</h2>
 		{% include 'profile/twitter_auth.html' %}
 		{% else %}
 		{% include 'profile/twitter_js.html' %}

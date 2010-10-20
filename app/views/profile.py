@@ -243,6 +243,7 @@ def return_fake_end_user(profile):
     level_list.append(tmp_dict)
 
     ret_dict = {'end_user_login':profile.uid,
-                'levels':level_list}
+                'level_summaries':level_list}
+
 
     return ret_dict

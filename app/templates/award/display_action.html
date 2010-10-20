@@ -1,0 +1,30 @@
+		{% for level in bd_end_user.level_summaries %}
+		<div id="fz-level">
+			<div class="levelwrapper">
+				<img id="fz-level-image" src={{ level.url }} height="200px" width="200px" /><br />
+				<div id="fz-level-label"><label for="fz-level-image">{{ level.end_user_title }}</label></div>
+				<div id="fz-level-description">{{ level.end_user_description }}</div>
+				{% if profile.fb_auth == 1 or profile.tw_auth == 1 %}
+				<form method="post" action="http://factionized.appspot.com/profile/facebook/feed">
+					<fieldset>
+						<input type="hidden"
+							   name="message"
+							   value="{{ level.end_user_title }}" />
+						<input type="hidden"
+							   name="image_url"
+							   value="{{ level.url }}" />
+						<input type="hidden"
+							   name="caption"
+							   value="{{ level.end_user_description }}" />
+						{% ifequal profile.fb_auth 1 %}
+						<button type="button" class="fz-facebook-post fz-button">Post it to Facebook!</button>
+						{% endifequal %}
+						{% ifequal profile.tw_auth 1 %}
+						<button type="button" class="fz-twitter-post fz-button">Post it to Twitter!</button>
+						{% endifequal %}
+					</fieldset>
+				</form>
+				{% endif %}
+			</div>
+		</div>
+		{% endfor %}

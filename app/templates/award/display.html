@@ -1,0 +1,9 @@
+		{% for level in bd_end_user.level_summaries %}
+		<div id="fz-level">
+			<div class="levelwrapper">
+				<img id="fz-level-image" src={{ level.url }} height="200px" width="200px" /><br />
+				<div id="fz-level-label"><label for="fz-level-image">{{ level.end_user_title }}</label></div>
+				<div id="fz-level-description">{{ level.end_user_description }}</div>
+			</div>
+		</div>
+		{% endfor %}

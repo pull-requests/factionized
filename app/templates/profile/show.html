@@ -8,40 +8,17 @@
         </div>
     {% endif %}
 
-
-
     <div id="games_pane" class="grid_12 pane">
 		<h2>Games</h2>
 		<div class="subhead">Games go <a href="s">here</a></div>
 	</div>
 	<div id="awards_pane" class="grid_12 pane">
 		<h2>Awards</h2>
+		{% if bd_end_user.level_summary %}
 		<div class="subhead">Awards go here</div>
-		{% for level in bd_end_user.level_summaries %}
-        <div id="fz-level">
-            <div class="levelwrapper">
-			<img id="fz-level-image" src="http://media.moddb.com/images/downloads/1/17/16213/cookie-monster_with_text.jpg" height="200px" width="200px" />
-            <div id="fz-level-label"><label for="fz-level-image">{{ level.pub_title }}</label></div>
-			<div id="fz-level-description">{{ level.pub_description }}</div>
-			{% ifequal profile.fb_auth 1 %}
-			<form method="post" action="http://www.factionized.com/profile/facebook/feed">
-				<fieldset>
-					<input type="hidden"
-						   name="message"
-						   value="{{ level.pub_title }}" />
-					<input type="hidden"
-						   name="image_url"
-						   value="http://media.moddb.com/images/downloads/1/17/16213/cookie-monster_with_text.jpg" />
-					<input type="hidden"
-						   name="caption"
-						   value="{{ level.pub_description }}" />
-					<button type="button" class="fz-facebook-post fz-button">Post it!</button>
-				</fieldset>
-			</form>
-            {% endifequal %}
-            </div>
-		</div>
-		{% endfor %}
-
+		{% include 'award/display.html' %}
+		{% else %}
+		<div class="subhead">This player hasn't earned any awards yet!</div>
+		{% endif %}
 	</div>
 {% endblock %}
