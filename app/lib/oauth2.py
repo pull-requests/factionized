@@ -28,7 +28,7 @@ import random
 import urlparse
 import hmac
 import binascii
-import httplib2
+from google.appengine.api import urlfetch
 
 try:
     from urlparse import parse_qs, parse_qsl
@@ -551,7 +551,7 @@ class Server(object):
                 'greater difference than threshold %d' % (timestamp, now, self.timestamp_threshold))
 
 
-class Client(httplib2.Http):
+class Client(object):
     """OAuthClient is a worker to attempt to execute a request."""
 
     def __init__(self, consumer, token=None, cache=None, timeout=None,
@@ -567,8 +567,8 @@ class Client(httplib2.Http):
         self.token = token
         self.method = SignatureMethod_HMAC_SHA1()
 
-        httplib2.Http.__init__(self, cache=cache, timeout=timeout, 
-            proxy_info=proxy_info)
+        #httplib2.Http.__init__(self, cache=cache, timeout=timeout, 
+            #proxy_info=proxy_info)
 
     def set_signature_method(self, method):
         if not isinstance(method, SignatureMethod):
@@ -577,9 +577,9 @@ class Client(httplib2.Http):
         self.method = method
 
     def request(self, uri, method="GET", body=None, headers=None, 
-        redirections=httplib2.DEFAULT_MAX_REDIRECTS, connection_type=None,
+        redirections=4, connection_type=None,
         force_auth_header=False):
-        
+
         if not isinstance(headers, dict):
             headers = {}
 
@@ -614,9 +614,14 @@ class Client(httplib2.Http):
                 # don't call update twice.
                 headers.update(req.to_header())
 
-        return httplib2.Http.request(self, uri, method=method, body=body, 
-            headers=headers, redirections=redirections, 
-            connection_type=connection_type)
+        return urlfetch.fetch(url=uri,
+                              method=method,
+                              payload=body,
+                              headers=headers,
+                              follow_redirects=True)
+        #return httplib2.Http.request(self, uri, method=method, body=body, 
+            #headers=headers, redirections=redirections, 
+            #connection_type=connection_type)
 
 
 class SignatureMethod(object):

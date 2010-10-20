@@ -2,16 +2,11 @@ import re
 import cgi
 import urllib
 
-from hashlib import sha1
-from hmac import new as hmac
-from random import getrandbits
-from time import time
-
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.conf import settings
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
+
 from google.appengine.api import urlfetch
 
 from app.decorators import login_required
@@ -132,10 +127,10 @@ def facebook_auth(request):
     verification_code = request.GET.get('code')
     redirect_uri = request.build_absolute_uri()
     redirect_uri = redirect_uri.split("?")[0]
-    args = dict(client_id=settings.FACEBOOK_API_KEY,
+    args = dict(client_id=getattr(settings, 'FACEBOOK_API_KEY'),
                 redirect_uri=redirect_uri)
     if verification_code:
-        args['client_secret'] = settings.FACEBOOK_SECRET_KEY
+        args['client_secret'] = getattr(settings,'FACEBOOK_SECRET_KEY')
         args['code'] = verification_code
         access_token_url = "https://graph.facebook.com/oauth/access_token?"
         resp = urlfetch.fetch(access_token_url +
@@ -166,6 +161,7 @@ def twitter_auth(request):
 
     if profile.tw_token and profile.tw_token_secret:
         # We have already authorized user
+        # Probably should check to see if the tokens are still valid..
         auth_response = HttpResponse()
         auth_response.content = return_self_closing_page()
 
@@ -178,11 +174,11 @@ def twitter_auth(request):
         oauth_consumer = oauth.Consumer(key=getattr(settings, 'TWITTER_API_KEY'),
                                         secret=getattr(settings, 'TWITTER_SECRET_KEY'))
         oauth_client = oauth.Client(oauth_consumer)
-        resp, content = oauth_client.request('https://api.twitter.com/oauth/access_token',
-                                             method='POST',
-                                             body='oauth_token=%s' % (auth_token))
+        resp = oauth_client.request('https://api.twitter.com/oauth/access_token',
+                                    method='POST',
+                                    body='oauth_token=%s' % (auth_token))
 
-        content = dict(cgi.parse_qsl(content))
+        content = dict(cgi.parse_qsl(resp.content))
 
         profile.tw_token = content['oauth_token']
         profile.tw_token_secret = content['oauth_token_secret']
@@ -199,9 +195,9 @@ def twitter_auth(request):
     oauth_consumer = oauth.Consumer(key=getattr(settings, 'TWITTER_API_KEY'),
                                     secret=getattr(settings, 'TWITTER_SECRET_KEY'))
     oauth_client = oauth.Client(oauth_consumer)
-    resp, content = oauth_client.request('https://api.twitter.com/oauth/request_token', 'GET')
+    resp = oauth_client.request('https://api.twitter.com/oauth/request_token', 'GET')
 
-    content = dict(cgi.parse_qsl(content))
+    content = dict(cgi.parse_qsl(resp.content))
     redirect_uri = request.build_absolute_uri()
     redirect_uri = redirect_uri.split("?")[0]
 

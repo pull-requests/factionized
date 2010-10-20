@@ -40,7 +40,6 @@ class TwitterUser(object):
             message = '%s: %s' % (short_image_url,
                                   message)
 
-        message = message.replace(' ','+')
         api = Api(consumer_key=self.api_key, consumer_secret=self.api_secret,
                   access_token_key=self.auth_token, access_token_secret=self.auth_token_secret)
         status = api.PostUpdate(message)
