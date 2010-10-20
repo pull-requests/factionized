@@ -43,7 +43,7 @@
 				appendTo(api.tabs.panes);
 			(content_callback || $.noop)(pane, thread);
 		});
-		api.tabs.labels.tabs('> .fz-panes', {
+		api.tabs.labels.tabs('.fz-panes > .fz-pane', {
 			tabs: 'fz-pane',
 			current: 'fz-current'
 		});
@@ -117,7 +117,7 @@
 					attr('href', 'javascript:void(0)').
 					addClass('fz-button').
 					append('Send').
-					click(function() {
+					click(function(e) {
 						submit(thread.input.val())
 						e.preventDefault();
 					})

@@ -23,10 +23,10 @@
                         <a href="/games/{{game.uid}}">
                             <span class="game-name">{{game.name}}</span>
                             <div class="game-description">
-                                Started by {{ game.game_starter.user.nickname }}
+                                Started by {{ game.game_starter.name }}
                                 <span class="game-status">
                                     {% ifequal game.get_current_round.number 0 %}
-                                    Game not started ({{ game.signups|length }} players)
+                                    Game not started
                                     {% else %}
                                         {% if game.is_over %}
                                             Game finished
@@ -34,6 +34,7 @@
                                             Round: {{ game.get_current_round.number|apnumber }}
                                         {% endif %}
                                     {% endifequal %}
+                                    &nbsp;({{ game.signups|length }} players)
                                 </span>
                             </div>
                         </a>
