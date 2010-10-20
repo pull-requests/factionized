@@ -19,9 +19,9 @@ from app.models import Profile
 from app.shortcuts import render
 
 from app.lib import facebook
-from app.lib import oauth2 as oauth
+#from app.lib import oauth2 as oauth
 from app.lib.fb import FacebookUser
-from app.lib.tw import TwitterUser
+#from app.lib.tw import TwitterUser
 
 #from bigdoorkit.resources.user import EndUser
 
