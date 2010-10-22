@@ -1,0 +1,24 @@
+{% extends 'shared/layouts/canvas.html' %}
+
+{% block canvas %}
+
+    {% if is_editable %}
+        <div id="edit_pane" class="grid_12 pane">
+            <a href="/profile/edit" class="fz-button">Edit your profile</a>
+        </div>
+    {% endif %}
+
+    <div id="games_pane" class="grid_12 pane">
+		<h2>Games</h2>
+		<div class="subhead">Games go <a href="/games">here</a></div>
+	</div>
+	<div id="awards_pane" class="grid_12 pane">
+		<h2>Awards</h2>
+		{% if bd_end_user.level_summary %}
+		<div class="subhead">Awards go here</div>
+		{% include 'award/display.html' %}
+		{% else %}
+		<div class="subhead">This player hasn't earned any awards yet!</div>
+		{% endif %}
+	</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'shared/layouts/canvas.html' %}
+
+{% block canvas %}
+	<div class="grid_12 page_header">
+		<h2>Edit your profile</h2>
+	</div>
+	<div class="grid_12" id="games_pane">
+		<h2>Games</h2>
+		<div class="subhead">Games go here</div>
+	</div>
+	<div class="grid_12"  id="awards_pane">
+		<h2>Awards</h2>
+		{% if bd_end_user.level_summaries %}
+		<div class="subhead">Awards go here</div>
+		{% include 'award/display_action.html' %}
+		{% else %}
+		<div class="subhead">You haven't earned any awards yet! Go kill some Gangsters!</div>
+		{% endif %}
+	</div>
+	<div class="grid_12" id="facebook_pane">
+		{% ifequal profile.fb_auth 0 %}
+		<h2>Authorize Facebook</h2>
+		{% include 'profile/facebook_auth.html' %}
+		{% else %}
+		{% include 'profile/facebook_js.html' %}
+		{% endifequal %}
+	</div>
+	<div id="twitter_pane">
+		{% ifequal profile.tw_auth 0 %}
+		<h2>Authorize Twitter</h2>
+		{% include 'profile/twitter_auth.html' %}
+		{% else %}
+		{% include 'profile/twitter_js.html' %}
+		{% endifequal %}
+	<div>
+{% endblock %}

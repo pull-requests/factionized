@@ -1,0 +1,26 @@
+{% extends 'shared/layouts/canvas.html' %}
+
+{% block js_includes %}
+	{% include 'shared/includes/js_gaming.html' %}
+	<script type="text/javascript" src="/js/factionized/core.js"></script>
+	<script type="text/javascript" src="/js/factionized/poll.js"></script>
+	<script type="text/javascript" src="/js/factionized/models.js"></script>
+	<script type="text/javascript" src="/js/factionized/game.js"></script>
+	<script type="text/javascript" src="/js/factionized/game_controls.js"></script>
+	<script type="text/javascript" src="/js/factionized/shortcuts.js"></script>
+{% endblock %}
+
+{% block canvas %}
+	<h1 class="grid_12">{{ game.name }}</h1>
+    <div class="grid_9">
+        <div id="viewport" class="fz-game"></div>
+    </div>
+    <div class="grid_3 sidebar">
+        <div id="viewport-controls" class="fz-actions fz-meta tinywrapper"></div>
+    </div>
+	<script type="text/javascript">
+		var init_data = {{ serialized|safe }}
+		$('#viewport').game(init_data);
+		$('#viewport-controls').game_controls(init_data);
+	</script>
+{% endblock %}

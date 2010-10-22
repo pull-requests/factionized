@@ -1,0 +1,20 @@
+<div id="header">
+	<div class="container_12">
+		<div class="grid_12 authlink">
+			{% if user %}
+			<a href="/profile/{{ profile.uid }}">{{ user.nickname }}</a>
+				&nbsp;|&nbsp;
+				<a href="{{ logout_url }}">Sign out</a>
+			{% else %}
+				<a href="{{ login_url }}">Sign in</a>
+			{% endif %}	
+		</div>
+		<div class="grid_4">
+			<a id="masthead" href="/">Factionized</a>
+		</div>
+		<div class="grid_8 main-nav">
+			<a href="/games">Games</a>
+		</div>
+	</div>
+	<div class="clear"></div>
+</div>

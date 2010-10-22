@@ -1,0 +1,14 @@
+{% extends 'shared/layouts/base.html' %}
+{% block body %}
+	<div id="wrapper">
+		{% block header %}
+			{% include 'shared/includes/header.html' %}
+		{% endblock %}
+		<div class="canvas container_12">
+			{% block canvas %}{% endblock %}
+		</div>
+	</div>
+		{% block footer %}
+			{% include 'shared/includes/footer.html' %}
+		{% endblock %}
+{% endblock %}

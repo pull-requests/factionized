@@ -1,0 +1,24 @@
+<div id="facebook_auth">
+	<script type="text/javascript">
+		var chk_timer,fb_auth_window;
+		function fb_auth() {
+			fb_auth_window = window.open("http://factionized.appspot.com/profile/facebook/auth",
+										 "Link Facebook with your Factionized account.",
+										 "width=1000,height=650,scrollbars=no");
+			chk_timer = setInterval("fb_auth_window_chk_closed()",1000);
+		};
+		function fb_auth_window_chk_closed() {
+			if (fb_auth_window && fb_auth_window.closed) {
+				clearInterval(chk_timer);
+				window.location.reload();
+			}
+		};
+		$(document).ready(function() {
+			$('.fz-button.fz-facebook').click(function(e) {
+				fb_auth();
+				return false;
+			});
+		});
+	</script>
+	<a href="javascript:void(0)" class="fz-facebook fz-button">Link to Facebook</a>
+</div>
