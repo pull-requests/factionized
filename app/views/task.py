@@ -26,8 +26,8 @@ def get_thread_highest_vote(thread):
     vote_summary = thread.votesummary_set.order('-total')
     results = filter(lambda x: x.total == vote_summary[0].total,
                      vote_summary)
-    random.shuffle(results)
     if len(results):
+        random.shuffle(results)
         return results[0].role
     else:
         # we will randomly choose someone in the thread now
