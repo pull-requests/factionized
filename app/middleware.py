@@ -19,8 +19,8 @@ class GoogleUserMiddleware(object):
                 request.profile = p
 
 class ContextMiddleware(object):
-    """ Adds the request to the current thread context for access accross
-    accross the project
+    """ Adds the request to the current thread context for access across
+    the project
     """
     def process_request(self, request):
         context.request = request
